@@ -7,7 +7,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="flex gap-3 px-4 py-2">
+  <div class="flex gap-3 py-2">
     <!-- Avatar -->
     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
       <CpuChipIcon class="w-4 h-4 text-purple-600" />

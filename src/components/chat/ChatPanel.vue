@@ -21,11 +21,12 @@ function handleSend(content: string, imageBase64?: string) {
     <div class="flex-1 overflow-y-auto">
       <MessageList :messages="sessionStore.messages" />
 
-      <!-- Streaming response -->
-      <StreamingText
-        v-if="sessionStore.streamingText"
-        :text="sessionStore.streamingText"
-      />
+      <!-- Streaming response (centered to match message list) -->
+      <div v-if="sessionStore.streamingText" class="px-4">
+        <div class="max-w-[60%] mx-auto">
+          <StreamingText :text="sessionStore.streamingText" />
+        </div>
+      </div>
     </div>
 
     <!-- Input area -->

@@ -77,11 +77,12 @@ function clearImage() {
 
 <template>
   <div class="p-4">
-    <!-- Image preview -->
-    <div
-      v-if="imagePreview"
-      class="mb-3 relative inline-block"
-    >
+    <div class="max-w-[60%] mx-auto">
+      <!-- Image preview -->
+      <div
+        v-if="imagePreview"
+        class="mb-3 relative inline-block"
+      >
       <img
         :src="imagePreview"
         alt="Attached image"
@@ -137,9 +138,10 @@ function clearImage() {
       </button>
     </div>
 
-    <!-- Helper text -->
-    <p class="mt-2 text-xs text-gray-400">
-      Press Enter to send, Shift+Enter for new line
-    </p>
+      <!-- Helper text -->
+      <p class="mt-2 text-xs text-gray-400">
+        Press Enter to send, Shift+Enter for new line
+      </p>
+    </div>
   </div>
 </template>
