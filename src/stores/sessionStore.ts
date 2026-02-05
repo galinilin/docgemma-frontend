@@ -96,7 +96,9 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function setError(message: string, recoverable: boolean) {
+    console.log('[SessionStore] setError called:', { message, recoverable })
     error.value = { message, recoverable }
+    console.log('[SessionStore] error.value is now:', error.value)
   }
 
   function clearError() {

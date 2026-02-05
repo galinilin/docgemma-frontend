@@ -14,6 +14,8 @@ export function handleEvent(event: unknown): void {
   const sessionStore = useSessionStore()
   const graphStore = useGraphStore()
 
+  console.log('[WS Event]', e.event, event)
+
   switch (e.event) {
     case 'node_start':
       graphStore.setNodeStatus(e.node_id, 'active')
@@ -66,10 +68,12 @@ export function handleEvent(event: unknown): void {
       break
 
     case 'error':
+      console.log('[WS Error Event] message:', e.message, 'recoverable:', e.recoverable)
       sessionStore.setError(e.message, e.recoverable)
       if (!e.recoverable) {
         sessionStore.setStatus('error')
       }
+      console.log('[WS Error Event] sessionStore.error:', sessionStore.error)
       break
 
     default:

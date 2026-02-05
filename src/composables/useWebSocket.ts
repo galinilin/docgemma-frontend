@@ -1,7 +1,7 @@
 /**
- * WebSocket connection composable
+ * WebSocket connection composable (singleton pattern for HMR stability)
  */
-import { ref, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useWebsocketStore } from '@/stores/websocketStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { handleEvent, resetGraphForNewTurn } from '@/utils/eventHandlers'
@@ -11,21 +11,32 @@ const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api'
 const MAX_RECONNECT_ATTEMPTS = 5
 const RECONNECT_DELAY_MS = 2000
 
+// Singleton socket state (persists across HMR)
+const socket = ref<WebSocket | null>(null)
+let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
+let currentSessionId: string | null = null
+
 export function useWebSocket() {
   const wsStore = useWebsocketStore()
   const sessionStore = useSessionStore()
 
-  const socket = ref<WebSocket | null>(null)
-  let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
-
   function connect(sessionId: string) {
-    if (socket.value?.readyState === WebSocket.OPEN) {
-      socket.value.close()
+    // Skip if already connected to this session
+    if (socket.value?.readyState === WebSocket.OPEN && currentSessionId === sessionId) {
+      console.log('[WS] Already connected to session:', sessionId)
+      return
     }
 
+    // Close existing connection if connecting to different session
+    if (socket.value?.readyState === WebSocket.OPEN) {
+      socket.value.close(1000)
+    }
+
+    currentSessionId = sessionId
     wsStore.setStatus('connecting')
 
     const wsUrl = `${WS_BASE}/sessions/${sessionId}/ws`
+    console.log('[WS] Connecting to:', wsUrl)
     socket.value = new WebSocket(wsUrl)
 
     socket.value.onopen = () => {
@@ -34,11 +45,13 @@ export function useWebSocket() {
     }
 
     socket.value.onmessage = (event) => {
+      console.log('[WS] Raw message received:', event.data)
       try {
         const data = JSON.parse(event.data)
+        console.log('[WS] Parsed message:', data)
         handleEvent(data)
       } catch (e) {
-        console.error('Failed to parse WebSocket message:', e)
+        console.error('[WS] Failed to parse WebSocket message:', e)
       }
     }
 
@@ -81,6 +94,7 @@ export function useWebSocket() {
       socket.value = null
     }
 
+    currentSessionId = null
     wsStore.reset()
   }
 
@@ -139,10 +153,7 @@ export function useWebSocket() {
     })
   }
 
-  // Cleanup on unmount
-  onUnmounted(() => {
-    disconnect()
-  })
+  // Note: No onUnmounted cleanup - socket is singleton and persists across HMR
 
   return {
     socket,
