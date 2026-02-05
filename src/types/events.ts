@@ -1,6 +1,7 @@
 /**
  * WebSocket event types - mirrors backend event schemas
  */
+import type { ClinicalTrace } from './trace'
 
 // Base event structure
 export interface BaseEvent {
@@ -59,6 +60,7 @@ export interface CompletionEvent extends BaseEvent {
   event: 'completion'
   final_response: string
   tool_calls_made: number
+  clinical_trace?: ClinicalTrace
 }
 
 // Error event
