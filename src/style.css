@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Vue Flow custom styling */
+.vue-flow__node {
+  cursor: grab;
+}
+
+.vue-flow__node:active {
+  cursor: grabbing;
+}
+
+/* Animated edge pulse */
+@keyframes edge-pulse {
+  0%, 100% {
+    stroke-opacity: 1;
+  }
+  50% {
+    stroke-opacity: 0.5;
+  }
+}
+
+.animated-edge {
+  animation: edge-pulse 1.5s ease-in-out infinite;
+}
