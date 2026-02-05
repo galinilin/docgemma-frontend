@@ -13,6 +13,7 @@ export type NodeType = 'llm' | 'tool' | 'code' | 'decision' | 'default'
 
 // Message in conversation
 export interface Message {
+  id: string
   role: 'user' | 'assistant' | 'tool'
   content: string
   timestamp: string

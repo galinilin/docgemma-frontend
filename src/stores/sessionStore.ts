@@ -41,12 +41,29 @@ export const useSessionStore = defineStore('session', () => {
     status.value = newStatus
   }
 
-  function addMessage(message: Message) {
-    messages.value.push(message)
+  function addMessage(message: Omit<Message, 'id'> & { id?: string }) {
+    // Generate ID if not provided
+    const id = message.id || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
+    // Deduplicate: don't add if a message with same content and role exists recently
+    const isDuplicate = messages.value.some(
+      (m) =>
+        m.role === message.role &&
+        m.content === message.content &&
+        Math.abs(new Date(m.timestamp).getTime() - new Date(message.timestamp).getTime()) < 5000
+    )
+
+    if (!isDuplicate) {
+      messages.value.push({ ...message, id })
+    }
   }
 
-  function setMessages(newMessages: Message[]) {
-    messages.value = newMessages
+  function setMessages(newMessages: Array<Omit<Message, 'id'> & { id?: string }>) {
+    // Ensure all messages have IDs
+    messages.value = newMessages.map((m, i) => ({
+      ...m,
+      id: m.id || `loaded-${i}-${Date.now()}`,
+    }))
   }
 
   function setPendingApproval(approval: PendingToolApproval | null) {

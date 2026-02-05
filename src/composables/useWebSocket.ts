@@ -109,8 +109,10 @@ export function useWebSocket() {
   }
 
   function sendMessage(content: string, imageBase64?: string) {
-    // Reset graph state for new turn
+    // Reset all turn state for new message
     resetGraphForNewTurn()
+    sessionStore.resetTurnState()  // Clear tool results, streaming text, etc.
+    sessionStore.clearStreamingText()  // Explicitly clear any streaming text
     sessionStore.setStatus('processing')
 
     // Add user message immediately

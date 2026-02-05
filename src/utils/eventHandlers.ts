@@ -60,7 +60,10 @@ export function handleEvent(event: unknown): void {
         role: 'assistant',
         content: e.final_response,
         timestamp: e.timestamp,
-        metadata: { tool_calls_made: e.tool_calls_made },
+        metadata: {
+          tool_calls_made: e.tool_calls_made,
+          clinical_trace: e.clinical_trace,
+        },
       })
       sessionStore.clearStreamingText()
       sessionStore.setStatus('active')
