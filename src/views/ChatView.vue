@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { AppLayout } from '@/components/layout'
-import { GraphPanel } from '@/components/graph'
 import { ChatPanel } from '@/components/chat'
-import { ToolPanel, ToolApprovalModal } from '@/components/tools'
+import { ToolApprovalModal } from '@/components/tools'
 import { ErrorBanner } from '@/components/common'
-import { useSessionStore, useGraphStore } from '@/stores'
+import { useSessionStore } from '@/stores'
 import { useApi, useWebSocket } from '@/composables'
 
 const sessionStore = useSessionStore()
-const graphStore = useGraphStore()
 const api = useApi()
 const ws = useWebSocket()
 
@@ -31,10 +29,6 @@ onMounted(async () => {
     if (session.messages.length > 0) {
       sessionStore.setMessages(session.messages)
     }
-
-    // Fetch initial graph state
-    const graphState = await api.getGraphState(session.session_id)
-    graphStore.setGraph(graphState.nodes, graphState.edges)
 
     // Connect WebSocket
     ws.connect(session.session_id)
@@ -66,13 +60,9 @@ async function handleNewSession() {
   try {
     ws.disconnect()
     sessionStore.resetState()
-    graphStore.clear()
 
     const session = await api.createSession()
     sessionStore.setSession(session.session_id)
-
-    const graphState = await api.getGraphState(session.session_id)
-    graphStore.setGraph(graphState.nodes, graphState.edges)
 
     ws.connect(session.session_id)
 
@@ -84,19 +74,6 @@ async function handleNewSession() {
   }
 }
 
-async function handleRefreshSession() {
-  console.log('[ChatView] handleRefreshSession called')
-  if (!sessionStore.sessionId) return
-
-  try {
-    graphStore.clear()
-    const graphState = await api.getGraphState(sessionStore.sessionId)
-    graphStore.setGraph(graphState.nodes, graphState.edges)
-  } catch (err) {
-    console.error('Failed to refresh session:', err)
-  }
-}
-
 async function handleSelectSession(sessionId: string) {
   console.log('[ChatView] handleSelectSession called:', sessionId)
   if (sessionId === sessionStore.sessionId) return
@@ -104,16 +81,12 @@ async function handleSelectSession(sessionId: string) {
   try {
     ws.disconnect()
     sessionStore.resetState()
-    graphStore.clear()
 
     const session = await api.getSession(sessionId)
     sessionStore.setSession(session.session_id)
     if (session.messages.length > 0) {
       sessionStore.setMessages(session.messages)
     }
-
-    const graphState = await api.getGraphState(session.session_id)
-    graphStore.setGraph(graphState.nodes, graphState.edges)
 
     ws.connect(session.session_id)
   } catch (err) {
@@ -135,20 +108,11 @@ async function handleDeleteSession(sessionId: string) {
   <AppLayout
     ref="appLayoutRef"
     @new-session="handleNewSession"
-    @refresh-session="handleRefreshSession"
     @select-session="handleSelectSession"
     @delete-session="handleDeleteSession"
   >
-    <template #graph>
-      <GraphPanel />
-    </template>
-
     <template #chat>
       <ChatPanel @send-message="handleSendMessage" />
-    </template>
-
-    <template #tools>
-      <ToolPanel />
     </template>
   </AppLayout>
 
