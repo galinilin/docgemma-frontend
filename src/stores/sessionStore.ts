@@ -17,8 +17,6 @@ export const useSessionStore = defineStore('session', () => {
   const status = ref<SessionStatus>('active')
   const messages = ref<Message[]>([])
   const pendingApproval = ref<PendingToolApproval | null>(null)
-  const currentNode = ref<string | null>(null)
-  const completedNodes = ref<string[]>([])
   const subtasks = ref<Subtask[]>([])
   const toolResults = ref<ToolResult[]>([])
   const streamingText = ref<string>('')
@@ -79,16 +77,6 @@ export const useSessionStore = defineStore('session', () => {
     status.value = 'processing'
   }
 
-  function setCurrentNode(nodeId: string | null) {
-    currentNode.value = nodeId
-  }
-
-  function addCompletedNode(nodeId: string) {
-    if (!completedNodes.value.includes(nodeId)) {
-      completedNodes.value.push(nodeId)
-    }
-  }
-
   function setSubtasks(newSubtasks: Subtask[]) {
     subtasks.value = newSubtasks
   }
@@ -132,8 +120,6 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function resetTurnState() {
-    currentNode.value = null
-    completedNodes.value = []
     subtasks.value = []
     toolResults.value = []
     executingTool.value = null
@@ -144,8 +130,6 @@ export const useSessionStore = defineStore('session', () => {
     status.value = 'active'
     messages.value = []
     pendingApproval.value = null
-    currentNode.value = null
-    completedNodes.value = []
     subtasks.value = []
     toolResults.value = []
     streamingText.value = ''
@@ -160,8 +144,6 @@ export const useSessionStore = defineStore('session', () => {
     status,
     messages,
     pendingApproval,
-    currentNode,
-    completedNodes,
     subtasks,
     toolResults,
     streamingText,
@@ -182,8 +164,6 @@ export const useSessionStore = defineStore('session', () => {
     setMessages,
     setPendingApproval,
     clearPendingApproval,
-    setCurrentNode,
-    addCompletedNode,
     setSubtasks,
     addToolResult,
     setToolExecuting,

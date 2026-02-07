@@ -3,7 +3,6 @@
  */
 import type { AgentEvent } from '@/types'
 import { useSessionStore } from '@/stores/sessionStore'
-import { useGraphStore } from '@/stores/graphStore'
 
 /**
  * Handle incoming WebSocket event
@@ -12,19 +11,14 @@ import { useGraphStore } from '@/stores/graphStore'
 export function handleEvent(event: unknown): void {
   const e = event as AgentEvent
   const sessionStore = useSessionStore()
-  const graphStore = useGraphStore()
 
   console.log('[WS Event]', e.event, event)
 
   switch (e.event) {
     case 'node_start':
-      graphStore.setNodeStatus(e.node_id, 'active')
-      sessionStore.setCurrentNode(e.node_id)
       break
 
     case 'node_end':
-      graphStore.setNodeStatus(e.node_id, 'completed')
-      sessionStore.addCompletedNode(e.node_id)
       break
 
     case 'agent_status':
@@ -89,12 +83,4 @@ export function handleEvent(event: unknown): void {
       // Graceful degradation for unknown events
       console.warn('Unknown event type:', (e as any).event, event)
   }
-}
-
-/**
- * Reset graph state for new turn
- */
-export function resetGraphForNewTurn(): void {
-  const graphStore = useGraphStore()
-  graphStore.resetAllNodeStatus()
 }

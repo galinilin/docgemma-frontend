@@ -4,7 +4,7 @@
 import { ref } from 'vue'
 import { useWebsocketStore } from '@/stores/websocketStore'
 import { useSessionStore } from '@/stores/sessionStore'
-import { handleEvent, resetGraphForNewTurn } from '@/utils/eventHandlers'
+import { handleEvent } from '@/utils/eventHandlers'
 import type { ClientAction } from '@/types'
 
 const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api'
@@ -110,7 +110,6 @@ export function useWebSocket() {
 
   function sendMessage(content: string, imageBase64?: string) {
     // Reset all turn state for new message
-    resetGraphForNewTurn()
     sessionStore.resetTurnState()  // Clear tool results, streaming text, etc.
     sessionStore.clearStreamingText()  // Explicitly clear any streaming text
     sessionStore.setStatus('processing')
