@@ -48,6 +48,14 @@ export interface ToolExecutionEndEvent extends BaseEvent {
   duration_ms: number
 }
 
+// Agent status event
+export interface AgentStatusEvent extends BaseEvent {
+  event: 'agent_status'
+  status_text: string
+  node_id: string | null
+  tool_name: string | null
+}
+
 // Streaming text event
 export interface StreamingTextEvent extends BaseEvent {
   event: 'streaming_text'
@@ -75,6 +83,7 @@ export interface ErrorEvent extends BaseEvent {
 export type AgentEvent =
   | NodeStartEvent
   | NodeEndEvent
+  | AgentStatusEvent
   | ToolApprovalRequestEvent
   | ToolExecutionStartEvent
   | ToolExecutionEndEvent

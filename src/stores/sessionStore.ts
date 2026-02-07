@@ -23,6 +23,7 @@ export const useSessionStore = defineStore('session', () => {
   const toolResults = ref<ToolResult[]>([])
   const streamingText = ref<string>('')
   const executingTool = ref<{ name: string; args: Record<string, unknown> } | null>(null)
+  const agentStatusText = ref<string>('')
   const error = ref<{ message: string; recoverable: boolean } | null>(null)
 
   // Computed
@@ -104,6 +105,14 @@ export const useSessionStore = defineStore('session', () => {
     executingTool.value = null
   }
 
+  function setAgentStatusText(text: string) {
+    agentStatusText.value = text
+  }
+
+  function clearAgentStatusText() {
+    agentStatusText.value = ''
+  }
+
   function appendStreamingText(text: string) {
     streamingText.value += text
   }
@@ -128,6 +137,7 @@ export const useSessionStore = defineStore('session', () => {
     subtasks.value = []
     toolResults.value = []
     executingTool.value = null
+    agentStatusText.value = ''
   }
 
   function resetState() {
@@ -140,6 +150,7 @@ export const useSessionStore = defineStore('session', () => {
     toolResults.value = []
     streamingText.value = ''
     executingTool.value = null
+    agentStatusText.value = ''
     error.value = null
   }
 
@@ -155,6 +166,7 @@ export const useSessionStore = defineStore('session', () => {
     toolResults,
     streamingText,
     executingTool,
+    agentStatusText,
     error,
 
     // Computed
@@ -176,6 +188,8 @@ export const useSessionStore = defineStore('session', () => {
     addToolResult,
     setToolExecuting,
     clearToolExecuting,
+    setAgentStatusText,
+    clearAgentStatusText,
     appendStreamingText,
     clearStreamingText,
     setError,

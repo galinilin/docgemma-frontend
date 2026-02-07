@@ -22,7 +22,7 @@ watch(
 </script>
 
 <template>
-  <div ref="listRef" class="h-full overflow-y-auto p-4">
+  <div ref="listRef" class="p-4">
     <!-- Centered container for messages -->
     <div class="max-w-[60%] mx-auto space-y-4">
       <MessageBubble

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import MarkdownIt from 'markdown-it'
 import type { Message } from '@/types'
 import type { ClinicalTrace } from '@/types/trace'
 import { UserIcon, CpuChipIcon, WrenchIcon } from '@heroicons/vue/24/solid'
 import { ChevronDownIcon } from '@heroicons/vue/24/solid'
 import ReasoningDrawer from './ReasoningDrawer.vue'
+
+const md = new MarkdownIt({ linkify: true, breaks: true })
 
 const props = defineProps<{
   message: Message
@@ -39,9 +42,22 @@ const iconClasses = computed(() => {
   return 'bg-purple-100 text-purple-600'
 })
 
+const renderedContent = computed(() => {
+  if (isAssistant.value) {
+    return md.render(props.message.content)
+  }
+  return ''
+})
+
 const formattedTime = computed(() => {
   const date = new Date(props.message.timestamp)
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+})
+
+const responseDuration = computed(() => {
+  const t = trace.value
+  if (!t || !t.total_duration_ms) return null
+  return (t.total_duration_ms / 1000).toFixed(1)
 })
 </script>
 
@@ -59,6 +75,13 @@ const formattedTime = computed(() => {
       <!-- Message content -->
       <div class="space-y-1">
         <div
+          v-if="isAssistant"
+          class="px-4 py-2 rounded-lg markdown-body"
+          :class="bubbleClasses"
+          v-html="renderedContent"
+        />
+        <div
+          v-else
           class="px-4 py-2 rounded-lg whitespace-pre-wrap"
           :class="bubbleClasses"
         >
@@ -68,6 +91,10 @@ const formattedTime = computed(() => {
           <p class="text-xs text-gray-400">
             {{ formattedTime }}
           </p>
+          <!-- Response time badge -->
+          <span v-if="responseDuration" class="text-xs text-gray-400">
+            Responded in {{ responseDuration }}s
+          </span>
           <!-- Trace toggle -->
           <button
             v-if="hasTrace"
@@ -86,3 +113,97 @@ const formattedTime = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.markdown-body :deep(h1) {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0.5rem;
+}
+.markdown-body :deep(h2) {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+}
+.markdown-body :deep(h3) {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+}
+.markdown-body :deep(p) {
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(p:first-child) {
+  margin-top: 0;
+}
+.markdown-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+.markdown-body :deep(ul) {
+  list-style-type: disc;
+}
+.markdown-body :deep(ol) {
+  list-style-type: decimal;
+}
+.markdown-body :deep(li) {
+  margin: 0.25rem 0;
+}
+.markdown-body :deep(strong) {
+  font-weight: 700;
+}
+.markdown-body :deep(em) {
+  font-style: italic;
+}
+.markdown-body :deep(code) {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+.markdown-body :deep(pre) {
+  background: #f3f4f6;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+.markdown-body :deep(pre code) {
+  background: none;
+  padding: 0;
+}
+.markdown-body :deep(blockquote) {
+  border-left: 3px solid #d1d5db;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: #6b7280;
+}
+.markdown-body :deep(table) {
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+  width: 100%;
+}
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid #e5e7eb;
+  padding: 0.375rem 0.75rem;
+  text-align: left;
+}
+.markdown-body :deep(th) {
+  background: #f9fafb;
+  font-weight: 600;
+}
+.markdown-body :deep(a) {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.markdown-body :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0.75rem 0;
+}
+</style>

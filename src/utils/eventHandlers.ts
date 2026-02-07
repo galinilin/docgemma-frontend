@@ -27,6 +27,10 @@ export function handleEvent(event: unknown): void {
       sessionStore.addCompletedNode(e.node_id)
       break
 
+    case 'agent_status':
+      sessionStore.setAgentStatusText(e.status_text)
+      break
+
     case 'tool_approval_request':
       sessionStore.setPendingApproval({
         tool_name: e.tool_name,
@@ -52,6 +56,7 @@ export function handleEvent(event: unknown): void {
       break
 
     case 'streaming_text':
+      sessionStore.clearAgentStatusText()
       sessionStore.appendStreamingText(e.text)
       break
 
@@ -66,6 +71,7 @@ export function handleEvent(event: unknown): void {
         },
       })
       sessionStore.clearStreamingText()
+      sessionStore.clearAgentStatusText()
       sessionStore.setStatus('active')
       sessionStore.resetTurnState()
       break

@@ -55,6 +55,13 @@ function handleSendMessage(content: string, imageBase64?: string) {
   ws.sendMessage(content, imageBase64)
 }
 
+function handleCancel() {
+  ws.cancel()
+  sessionStore.setStatus('active')
+  sessionStore.clearStreamingText()
+  sessionStore.clearAgentStatusText()
+}
+
 async function handleNewSession() {
   console.log('[ChatView] handleNewSession called')
   try {
@@ -112,7 +119,7 @@ async function handleDeleteSession(sessionId: string) {
     @delete-session="handleDeleteSession"
   >
     <template #chat>
-      <ChatPanel @send-message="handleSendMessage" />
+      <ChatPanel @send-message="handleSendMessage" @cancel="handleCancel" />
     </template>
   </AppLayout>
 
