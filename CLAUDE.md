@@ -22,7 +22,7 @@ src/
 │   │   ├── ChatPanel.vue        # Main chat container
 │   │   ├── ChatInput.vue        # Message input with image upload
 │   │   ├── MessageList.vue      # Scrollable message list (60% centered)
-│   │   ├── MessageBubble.vue    # Individual message + trace toggle
+│   │   ├── MessageBubble.vue    # Individual message + image display + trace toggle
 │   │   ├── StreamingText.vue    # Typing indicator for responses
 │   │   ├── TraceStepCard.vue    # Single step in reasoning trace
 │   │   └── ReasoningDrawer.vue  # Collapsible trace timeline
@@ -36,7 +36,7 @@ src/
 │       └── ErrorBanner.vue      # Error display
 ├── composables/
 │   ├── useApi.ts                # REST API calls
-│   └── useWebSocket.ts          # WebSocket connection (singleton)
+│   └── useWebSocket.ts          # WebSocket connection (singleton, Promise-based connect)
 ├── stores/
 │   ├── sessionStore.ts          # Chat state, messages, turn state
 │   ├── graphStore.ts            # (legacy, mostly unused)
@@ -55,21 +55,31 @@ src/
 
 ## Key Patterns
 
-### Message Flow
+### Message Flow (Lazy Session Creation)
 1. User types → `ChatInput` emits `send`
-2. `ChatView` calls `ws.sendMessage()`
-3. `useWebSocket.sendMessage()` resets state + sends via WebSocket
-4. Backend streams events → `handleEvent()` dispatches to stores
-5. `completion` event → `sessionStore.addMessage()` with trace
+2. `ChatView.handleSendMessage()` creates session lazily if `sessionStore.sessionId` is null
+3. `useWebSocket.connect()` returns `Promise<void>` (awaitable)
+4. `ws.sendMessage()` stores user message (with `image_url` in metadata if image attached), resets state, sends via WebSocket
+5. Backend streams events → `handleEvent()` dispatches to stores
+6. `completion` event → `sessionStore.addMessage()` with clinical trace
 
 ### State Reset on New Turn
 ```typescript
 // In useWebSocket.sendMessage()
-resetGraphForNewTurn()
 sessionStore.resetTurnState()
 sessionStore.clearStreamingText()
 sessionStore.setStatus('processing')
 ```
+
+### Image Display in Message Bubbles
+- `sendMessage()` stores `{ has_image: true, image_url: 'data:image/jpeg;base64,...' }` in message metadata
+- Backend persists `image_url` in session message metadata (survives page refresh)
+- `MessageBubble.vue` renders `<img>` above text for messages with `metadata.image_url`
+
+### Lazy Session Creation
+- `onMounted` in `ChatView` just resets state — no API call
+- `handleNewSession()` disconnects WebSocket + resets state — no API call
+- Session is created on first `handleSendMessage()` call (POST `/api/sessions` → connect WS → send message)
 
 ### Message Deduplication
 `sessionStore.addMessage()` rejects duplicates with same role+content within 5 seconds.
