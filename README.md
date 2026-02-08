@@ -1,6 +1,6 @@
 # DocGemma Frontend
 
-Vue 3 + Vue Flow frontend for the DocGemma Medical AI Assistant.
+Vue 3 + TypeScript frontend for the DocGemma Medical AI Assistant.
 
 ## Quick Start
 
@@ -30,18 +30,18 @@ VITE_WS_URL=ws://localhost:8000/api
 ## Tech Stack
 
 - **Framework:** Vue 3 + Vite + TypeScript
-- **Graph Visualization:** Vue Flow + Dagre
 - **State Management:** Pinia
 - **Styling:** Tailwind CSS
 - **Icons:** Heroicons
 
 ## Features
 
-- Real-time agent state visualization via Vue Flow
-- WebSocket-based streaming for live updates
+- WebSocket-based streaming for real-time agent updates
+- Lazy session creation (session created on first message, not page load)
+- Image upload with display in message bubbles (persists across refresh)
+- Clinical trace — inline collapsible reasoning timeline per message
 - Tool approval modal for human-in-the-loop control
-- Data-driven node styling (no code changes needed for new node types)
-- Image upload support for medical image analysis
+- EHR browser with patient list and chart views
 
 ## Documentation
 
