@@ -21,21 +21,10 @@ watch(error, (newError) => {
   console.log('[ChatView] error changed:', newError)
 }, { immediate: true })
 
-onMounted(async () => {
-  // Create a new session on mount
-  try {
-    const session = await api.createSession()
-    sessionStore.setSession(session.session_id)
-    if (session.messages.length > 0) {
-      sessionStore.setMessages(session.messages)
-    }
-
-    // Connect WebSocket
-    ws.connect(session.session_id)
-  } catch (err) {
-    sessionStore.setError('Failed to initialize session', false)
-    console.error('Failed to create session:', err)
-  }
+onMounted(() => {
+  // Start with a clean slate — session created lazily on first message
+  sessionStore.resetState()
+  sessionStore.sessionId = null
 })
 
 function handleApprove() {
@@ -50,8 +39,24 @@ function dismissError() {
   sessionStore.clearError()
 }
 
-function handleSendMessage(content: string, imageBase64?: string) {
+async function handleSendMessage(content: string, imageBase64?: string) {
   console.log('[ChatView] handleSendMessage called:', { content, imageBase64: !!imageBase64 })
+
+  // Lazily create session on first message
+  if (!sessionStore.sessionId) {
+    try {
+      const session = await api.createSession()
+      sessionStore.setSession(session.session_id)
+      await ws.connect(session.session_id)
+      // Refresh sidebar to show the new session
+      appLayoutRef.value?.sidebarRef?.loadSessions()
+    } catch (err) {
+      sessionStore.setError('Failed to create session', false)
+      console.error('Failed to create session:', err)
+      return
+    }
+  }
+
   ws.sendMessage(content, imageBase64)
 }
 
@@ -62,23 +67,11 @@ function handleCancel() {
   sessionStore.clearAgentStatusText()
 }
 
-async function handleNewSession() {
+function handleNewSession() {
   console.log('[ChatView] handleNewSession called')
-  try {
-    ws.disconnect()
-    sessionStore.resetState()
-
-    const session = await api.createSession()
-    sessionStore.setSession(session.session_id)
-
-    ws.connect(session.session_id)
-
-    // Refresh sidebar list
-    appLayoutRef.value?.sidebarRef?.loadSessions()
-  } catch (err) {
-    sessionStore.setError('Failed to create new session', false)
-    console.error('Failed to create new session:', err)
-  }
+  ws.disconnect()
+  sessionStore.resetState()
+  sessionStore.sessionId = null
 }
 
 async function handleSelectSession(sessionId: string) {

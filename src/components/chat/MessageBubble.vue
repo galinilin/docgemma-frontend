@@ -42,6 +42,8 @@ const iconClasses = computed(() => {
   return 'bg-purple-100 text-purple-600'
 })
 
+const imageUrl = computed(() => props.message.metadata?.image_url as string | undefined)
+
 const renderedContent = computed(() => {
   if (isAssistant.value) {
     return md.render(props.message.content)
@@ -85,6 +87,12 @@ const responseDuration = computed(() => {
           class="px-4 py-2 rounded-lg whitespace-pre-wrap"
           :class="bubbleClasses"
         >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            alt="Uploaded medical image"
+            class="max-w-xs max-h-48 rounded-lg mb-2"
+          />
           {{ message.content }}
         </div>
         <div class="flex items-center gap-2" :class="{ 'justify-end': isUser }">
