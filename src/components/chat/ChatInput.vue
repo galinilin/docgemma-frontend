@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from '@heroicons/vue/24/solid'
+import { PaperAirplaneIcon, PhotoIcon, XMarkIcon, StopIcon } from '@heroicons/vue/24/solid'
 
 const props = withDefaults(
   defineProps<{
@@ -17,6 +17,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   send: [content: string, imageBase64?: string]
+  cancel: []
 }>()
 
 const inputText = ref('')
@@ -77,11 +78,12 @@ function clearImage() {
 
 <template>
   <div class="p-4">
-    <!-- Image preview -->
-    <div
-      v-if="imagePreview"
-      class="mb-3 relative inline-block"
-    >
+    <div class="max-w-[60%] mx-auto">
+      <!-- Image preview -->
+      <div
+        v-if="imagePreview"
+        class="mb-3 relative inline-block"
+      >
       <img
         :src="imagePreview"
         alt="Attached image"
@@ -126,20 +128,29 @@ function clearImage() {
         />
       </div>
 
-      <!-- Send button -->
+      <!-- Send / Stop button -->
       <button
+        v-if="loading"
+        @click="emit('cancel')"
+        class="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+        title="Stop generation"
+      >
+        <StopIcon class="w-6 h-6" />
+      </button>
+      <button
+        v-else
         @click="handleSubmit"
         :disabled="disabled || !inputText.trim()"
         class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
       >
-        <PaperAirplaneIcon v-if="!loading" class="w-6 h-6" />
-        <div v-else class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <PaperAirplaneIcon class="w-6 h-6" />
       </button>
     </div>
 
-    <!-- Helper text -->
-    <p class="mt-2 text-xs text-gray-400">
-      Press Enter to send, Shift+Enter for new line
-    </p>
+      <!-- Helper text -->
+      <p class="mt-2 text-xs text-gray-400">
+        Press Enter to send, Shift+Enter for new line
+      </p>
+    </div>
   </div>
 </template>

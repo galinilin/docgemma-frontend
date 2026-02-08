@@ -3,7 +3,6 @@
  */
 import type { AgentEvent } from '@/types'
 import { useSessionStore } from '@/stores/sessionStore'
-import { useGraphStore } from '@/stores/graphStore'
 
 /**
  * Handle incoming WebSocket event
@@ -12,19 +11,18 @@ import { useGraphStore } from '@/stores/graphStore'
 export function handleEvent(event: unknown): void {
   const e = event as AgentEvent
   const sessionStore = useSessionStore()
-  const graphStore = useGraphStore()
 
   console.log('[WS Event]', e.event, event)
 
   switch (e.event) {
     case 'node_start':
-      graphStore.setNodeStatus(e.node_id, 'active')
-      sessionStore.setCurrentNode(e.node_id)
       break
 
     case 'node_end':
-      graphStore.setNodeStatus(e.node_id, 'completed')
-      sessionStore.addCompletedNode(e.node_id)
+      break
+
+    case 'agent_status':
+      sessionStore.setAgentStatusText(e.status_text)
       break
 
     case 'tool_approval_request':
@@ -52,6 +50,7 @@ export function handleEvent(event: unknown): void {
       break
 
     case 'streaming_text':
+      sessionStore.clearAgentStatusText()
       sessionStore.appendStreamingText(e.text)
       break
 
@@ -60,9 +59,13 @@ export function handleEvent(event: unknown): void {
         role: 'assistant',
         content: e.final_response,
         timestamp: e.timestamp,
-        metadata: { tool_calls_made: e.tool_calls_made },
+        metadata: {
+          tool_calls_made: e.tool_calls_made,
+          clinical_trace: e.clinical_trace,
+        },
       })
       sessionStore.clearStreamingText()
+      sessionStore.clearAgentStatusText()
       sessionStore.setStatus('active')
       sessionStore.resetTurnState()
       break
@@ -80,12 +83,4 @@ export function handleEvent(event: unknown): void {
       // Graceful degradation for unknown events
       console.warn('Unknown event type:', (e as any).event, event)
   }
-}
-
-/**
- * Reset graph state for new turn
- */
-export function resetGraphForNewTurn(): void {
-  const graphStore = useGraphStore()
-  graphStore.resetAllNodeStatus()
 }

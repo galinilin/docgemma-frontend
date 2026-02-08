@@ -4,7 +4,7 @@
 import { ref } from 'vue'
 import { useWebsocketStore } from '@/stores/websocketStore'
 import { useSessionStore } from '@/stores/sessionStore'
-import { handleEvent, resetGraphForNewTurn } from '@/utils/eventHandlers'
+import { handleEvent } from '@/utils/eventHandlers'
 import type { ClientAction } from '@/types'
 
 const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api'
@@ -20,11 +20,11 @@ export function useWebSocket() {
   const wsStore = useWebsocketStore()
   const sessionStore = useSessionStore()
 
-  function connect(sessionId: string) {
+  function connect(sessionId: string): Promise<void> {
     // Skip if already connected to this session
     if (socket.value?.readyState === WebSocket.OPEN && currentSessionId === sessionId) {
       console.log('[WS] Already connected to session:', sessionId)
-      return
+      return Promise.resolve()
     }
 
     // Close existing connection if connecting to different session
@@ -35,39 +35,43 @@ export function useWebSocket() {
     currentSessionId = sessionId
     wsStore.setStatus('connecting')
 
-    const wsUrl = `${WS_BASE}/sessions/${sessionId}/ws`
-    console.log('[WS] Connecting to:', wsUrl)
-    socket.value = new WebSocket(wsUrl)
+    return new Promise((resolve, reject) => {
+      const wsUrl = `${WS_BASE}/sessions/${sessionId}/ws`
+      console.log('[WS] Connecting to:', wsUrl)
+      socket.value = new WebSocket(wsUrl)
 
-    socket.value.onopen = () => {
-      wsStore.setStatus('connected')
-      wsStore.resetReconnectAttempts()
-    }
-
-    socket.value.onmessage = (event) => {
-      console.log('[WS] Raw message received:', event.data)
-      try {
-        const data = JSON.parse(event.data)
-        console.log('[WS] Parsed message:', data)
-        handleEvent(data)
-      } catch (e) {
-        console.error('[WS] Failed to parse WebSocket message:', e)
+      socket.value.onopen = () => {
+        wsStore.setStatus('connected')
+        wsStore.resetReconnectAttempts()
+        resolve()
       }
-    }
 
-    socket.value.onerror = (event) => {
-      console.error('WebSocket error:', event)
-      wsStore.setError('WebSocket connection error')
-    }
-
-    socket.value.onclose = (event) => {
-      wsStore.setStatus('disconnected')
-
-      // Attempt reconnect if not a clean close
-      if (event.code !== 1000 && event.code !== 4004) {
-        attemptReconnect(sessionId)
+      socket.value.onmessage = (event) => {
+        console.log('[WS] Raw message received:', event.data)
+        try {
+          const data = JSON.parse(event.data)
+          console.log('[WS] Parsed message:', data)
+          handleEvent(data)
+        } catch (e) {
+          console.error('[WS] Failed to parse WebSocket message:', e)
+        }
       }
-    }
+
+      socket.value.onerror = (event) => {
+        console.error('WebSocket error:', event)
+        wsStore.setError('WebSocket connection error')
+        reject(new Error('WebSocket connection error'))
+      }
+
+      socket.value.onclose = (event) => {
+        wsStore.setStatus('disconnected')
+
+        // Attempt reconnect if not a clean close
+        if (event.code !== 1000 && event.code !== 4004) {
+          attemptReconnect(sessionId)
+        }
+      }
+    })
   }
 
   function attemptReconnect(sessionId: string) {
@@ -109,8 +113,9 @@ export function useWebSocket() {
   }
 
   function sendMessage(content: string, imageBase64?: string) {
-    // Reset graph state for new turn
-    resetGraphForNewTurn()
+    // Reset all turn state for new message
+    sessionStore.resetTurnState()  // Clear tool results, streaming text, etc.
+    sessionStore.clearStreamingText()  // Explicitly clear any streaming text
     sessionStore.setStatus('processing')
 
     // Add user message immediately
@@ -118,7 +123,9 @@ export function useWebSocket() {
       role: 'user',
       content,
       timestamp: new Date().toISOString(),
-      metadata: imageBase64 ? { has_image: true } : {},
+      metadata: imageBase64
+        ? { has_image: true, image_url: `data:image/jpeg;base64,${imageBase64}` }
+        : {},
     })
 
     return send({

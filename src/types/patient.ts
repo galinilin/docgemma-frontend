@@ -53,6 +53,29 @@ export interface ClinicalNote {
   preview: string | null
 }
 
+export interface VitalSign {
+  id: string | null
+  name: string
+  value: number
+  unit: string
+  date: string | null
+}
+
+export interface ScreeningResult {
+  id: string | null
+  name: string
+  score: string
+  date: string | null
+}
+
+export interface VisitNote {
+  id: string | null
+  note_type: string
+  date: string | null
+  author: string | null
+  content: string
+}
+
 export interface PatientChart {
   patient_id: string
   name: string
@@ -63,6 +86,9 @@ export interface PatientChart {
   allergies: AllergyInfo[]
   labs: LabResult[]
   notes: ClinicalNote[]
+  vitals: VitalSign[]
+  screenings: ScreeningResult[]
+  visit_notes: VisitNote[]
   error: string | null
 }
 

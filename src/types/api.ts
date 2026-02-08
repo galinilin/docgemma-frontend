@@ -5,14 +5,9 @@
 // Session status enum
 export type SessionStatus = 'active' | 'processing' | 'waiting_approval' | 'error'
 
-// Node status for graph visualization
-export type NodeStatus = 'pending' | 'active' | 'completed' | 'skipped'
-
-// Node types for styling
-export type NodeType = 'llm' | 'tool' | 'code' | 'decision' | 'default'
-
 // Message in conversation
 export interface Message {
+  id: string
   role: 'user' | 'assistant' | 'tool'
   content: string
   timestamp: string
@@ -33,8 +28,6 @@ export interface SessionResponse {
   status: SessionStatus
   messages: Message[]
   pending_approval: PendingToolApproval | null
-  current_node: string | null
-  completed_nodes: string[]
   created_at: string
   updated_at: string
 }
@@ -43,22 +36,6 @@ export interface SessionResponse {
 export interface SessionListResponse {
   sessions: SessionResponse[]
   total: number
-}
-
-// Graph node for visualization
-export interface GraphNode {
-  id: string
-  label: string
-  status: NodeStatus
-  node_type: NodeType
-}
-
-// Graph edge for visualization
-export interface GraphEdge {
-  source: string
-  target: string
-  label: string | null
-  active: boolean
 }
 
 // Subtask from decompose intent
@@ -74,15 +51,6 @@ export interface ToolResult {
   success: boolean
   result: Record<string, unknown>
   duration_ms?: number
-}
-
-// Graph state response from API
-export interface GraphStateResponse {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-  current_node: string | null
-  subtasks: Subtask[]
-  tool_results: ToolResult[]
 }
 
 // Tool info

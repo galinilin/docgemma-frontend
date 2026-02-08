@@ -5,7 +5,6 @@ import { ref } from 'vue'
 import type {
   SessionResponse,
   SessionListResponse,
-  GraphStateResponse,
   ToolListResponse,
   HealthResponse,
   CreateSessionRequest,
@@ -133,22 +132,6 @@ export function useApi() {
     }
   }
 
-  // Graph
-  async function getGraphState(sessionId: string): Promise<GraphStateResponse> {
-    loading.value = true
-    error.value = null
-    try {
-      return await fetchJson<GraphStateResponse>(
-        `/sessions/${sessionId}/graph`
-      )
-    } catch (e) {
-      error.value = e as ApiError
-      throw e
-    } finally {
-      loading.value = false
-    }
-  }
-
   // Tools
   async function listTools(): Promise<ToolListResponse> {
     loading.value = true
@@ -171,7 +154,6 @@ export function useApi() {
     listSessions,
     getSession,
     deleteSession,
-    getGraphState,
     listTools,
   }
 }

@@ -22,12 +22,15 @@ watch(
 </script>
 
 <template>
-  <div ref="listRef" class="h-full overflow-y-auto p-4 space-y-4">
-    <MessageBubble
-      v-for="(message, index) in messages"
-      :key="index"
-      :message="message"
-    />
+  <div ref="listRef" class="p-4">
+    <!-- Centered container for messages -->
+    <div class="max-w-[60%] mx-auto space-y-4">
+      <MessageBubble
+        v-for="message in messages"
+        :key="message.id"
+        :message="message"
+      />
+    </div>
 
     <!-- Empty state -->
     <div

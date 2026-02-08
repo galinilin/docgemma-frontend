@@ -33,6 +33,7 @@ async function handleDelete(sessionId: string, event: Event) {
   try {
     await api.deleteSession(sessionId)
     sessions.value = sessions.value.filter(s => s.session_id !== sessionId)
+    emit('deleteSession', sessionId)
   } catch (err) {
     console.error('Failed to delete session:', err)
   }

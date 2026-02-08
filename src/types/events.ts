@@ -1,6 +1,7 @@
 /**
  * WebSocket event types - mirrors backend event schemas
  */
+import type { ClinicalTrace } from './trace'
 
 // Base event structure
 export interface BaseEvent {
@@ -47,6 +48,14 @@ export interface ToolExecutionEndEvent extends BaseEvent {
   duration_ms: number
 }
 
+// Agent status event
+export interface AgentStatusEvent extends BaseEvent {
+  event: 'agent_status'
+  status_text: string
+  node_id: string | null
+  tool_name: string | null
+}
+
 // Streaming text event
 export interface StreamingTextEvent extends BaseEvent {
   event: 'streaming_text'
@@ -59,6 +68,7 @@ export interface CompletionEvent extends BaseEvent {
   event: 'completion'
   final_response: string
   tool_calls_made: number
+  clinical_trace?: ClinicalTrace
 }
 
 // Error event
@@ -73,6 +83,7 @@ export interface ErrorEvent extends BaseEvent {
 export type AgentEvent =
   | NodeStartEvent
   | NodeEndEvent
+  | AgentStatusEvent
   | ToolApprovalRequestEvent
   | ToolExecutionStartEvent
   | ToolExecutionEndEvent

@@ -37,6 +37,9 @@ export const useEhrStore = defineStore('ehr', () => {
   const conditions = computed(() => currentChart.value?.conditions ?? [])
   const labs = computed(() => currentChart.value?.labs ?? [])
   const notes = computed(() => currentChart.value?.notes ?? [])
+  const vitals = computed(() => currentChart.value?.vitals ?? [])
+  const screenings = computed(() => currentChart.value?.screenings ?? [])
+  const visitNotes = computed(() => currentChart.value?.visit_notes ?? [])
 
   // Actions
   function setPatients(list: PatientSummary[]) {
@@ -153,6 +156,9 @@ export const useEhrStore = defineStore('ehr', () => {
     conditions,
     labs,
     notes,
+    vitals,
+    screenings,
+    visitNotes,
 
     // Actions
     setPatients,
