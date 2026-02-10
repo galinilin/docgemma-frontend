@@ -53,18 +53,6 @@ export interface ToolResult {
   duration_ms?: number
 }
 
-// Tool info
-export interface ToolInfo {
-  name: string
-  description: string
-  args: Record<string, string>
-}
-
-// Tool list response
-export interface ToolListResponse {
-  tools: ToolInfo[]
-}
-
 // Health response
 export interface HealthResponse {
   status: string

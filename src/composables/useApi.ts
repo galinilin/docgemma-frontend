@@ -5,7 +5,6 @@ import { ref } from 'vue'
 import type {
   SessionResponse,
   SessionListResponse,
-  ToolListResponse,
   HealthResponse,
   CreateSessionRequest,
 } from '@/types'
@@ -132,20 +131,6 @@ export function useApi() {
     }
   }
 
-  // Tools
-  async function listTools(): Promise<ToolListResponse> {
-    loading.value = true
-    error.value = null
-    try {
-      return await fetchJson<ToolListResponse>('/tools')
-    } catch (e) {
-      error.value = e as ApiError
-      throw e
-    } finally {
-      loading.value = false
-    }
-  }
-
   return {
     loading,
     error,
@@ -154,6 +139,5 @@ export function useApi() {
     listSessions,
     getSession,
     deleteSession,
-    listTools,
   }
 }
