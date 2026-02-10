@@ -7,7 +7,13 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { handleEvent } from '@/utils/eventHandlers'
 import type { ClientAction } from '@/types'
 
-const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api'
+function getWsBase(): string {
+  const envUrl = import.meta.env.VITE_WS_URL
+  if (envUrl) return envUrl
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}/api`
+}
+const WS_BASE = getWsBase()
 const MAX_RECONNECT_ATTEMPTS = 5
 const RECONNECT_DELAY_MS = 2000
 
