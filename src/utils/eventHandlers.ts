@@ -73,6 +73,8 @@ export function handleEvent(event: unknown): void {
     case 'error':
       console.log('[WS Error Event] message:', e.message, 'recoverable:', e.recoverable)
       sessionStore.setError(e.message, e.recoverable)
+      sessionStore.clearAgentStatusText()
+      sessionStore.clearStreamingText()
       if (!e.recoverable) {
         sessionStore.setStatus('error')
       }
