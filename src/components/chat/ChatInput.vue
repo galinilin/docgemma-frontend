@@ -24,6 +24,7 @@ const inputText = ref('')
 const imagePreview = ref<string | null>(null)
 const imageBase64 = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const focused = ref(false)
 
 function handleSubmit() {
   const text = inputText.value.trim()
@@ -77,80 +78,89 @@ function clearImage() {
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="px-4 py-3">
     <div class="max-w-[60%] mx-auto">
-      <!-- Image preview -->
+      <!-- Card container -->
       <div
-        v-if="imagePreview"
-        class="mb-3 relative inline-block"
+        class="rounded-2xl border bg-white transition-all duration-200"
+        :class="
+          focused
+            ? 'border-blue-300 shadow-md shadow-blue-100/50 ring-1 ring-blue-200/60'
+            : 'border-gray-200 shadow-sm hover:shadow'
+        "
       >
-      <img
-        :src="imagePreview"
-        alt="Attached image"
-        class="max-w-xs max-h-32 rounded-lg border border-gray-200"
-      />
-      <button
-        @click="clearImage"
-        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-      >
-        <XMarkIcon class="w-4 h-4" />
-      </button>
-    </div>
+        <!-- Image preview inside card -->
+        <div v-if="imagePreview" class="px-4 pt-3">
+          <div class="relative inline-block">
+            <img
+              :src="imagePreview"
+              alt="Attached image"
+              class="max-w-xs max-h-28 rounded-lg border border-gray-200"
+            />
+            <button
+              @click="clearImage"
+              class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors"
+            >
+              <XMarkIcon class="w-3 h-3" />
+            </button>
+          </div>
+        </div>
 
-    <!-- Input row -->
-    <div class="flex items-end gap-2">
-      <!-- Image upload button -->
-      <button
-        @click="openFilePicker"
-        :disabled="disabled"
-        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Attach image"
-      >
-        <PhotoIcon class="w-6 h-6" />
-      </button>
-      <input
-        ref="fileInputRef"
-        type="file"
-        accept="image/*"
-        class="hidden"
-        @change="handleFileSelect"
-      />
-
-      <!-- Text input -->
-      <div class="flex-1 relative">
+        <!-- Textarea -->
         <textarea
           v-model="inputText"
           :placeholder="placeholder"
           :disabled="disabled"
+          @focus="focused = true"
+          @blur="focused = false"
           @keydown="handleKeydown"
           rows="1"
-          class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+          class="w-full px-4 pt-3 pb-1 bg-transparent resize-none text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed"
         />
+
+        <!-- Bottom bar -->
+        <div class="flex items-center justify-between px-2.5 pb-2">
+          <!-- Left: image upload -->
+          <button
+            @click="openFilePicker"
+            :disabled="disabled"
+            class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Attach image"
+          >
+            <PhotoIcon class="w-5 h-5" />
+          </button>
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleFileSelect"
+          />
+
+          <!-- Right: send / stop -->
+          <button
+            v-if="loading"
+            @click="emit('cancel')"
+            class="p-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            title="Stop generation"
+          >
+            <StopIcon class="w-5 h-5" />
+          </button>
+          <button
+            v-else
+            @click="handleSubmit"
+            :disabled="disabled || !inputText.trim()"
+            class="p-1.5 rounded-lg transition-all duration-150"
+            :class="
+              inputText.trim()
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm hover:shadow-md hover:from-blue-700 hover:to-indigo-700'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+            "
+          >
+            <PaperAirplaneIcon class="w-5 h-5" />
+          </button>
+        </div>
       </div>
-
-      <!-- Send / Stop button -->
-      <button
-        v-if="loading"
-        @click="emit('cancel')"
-        class="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-        title="Stop generation"
-      >
-        <StopIcon class="w-6 h-6" />
-      </button>
-      <button
-        v-else
-        @click="handleSubmit"
-        :disabled="disabled || !inputText.trim()"
-        class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-      >
-        <PaperAirplaneIcon class="w-6 h-6" />
-      </button>
-    </div>
-
-      <!-- Helper text -->
-      <p class="mt-2 text-xs text-gray-400">
-        Press Enter to send, Shift+Enter for new line
-      </p>
     </div>
   </div>
 </template>
