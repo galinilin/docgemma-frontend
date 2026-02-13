@@ -97,6 +97,8 @@ export interface SendMessageAction {
   data: {
     content: string
     image_base64?: string | null
+    patient_id?: string | null
+    tool_calling_enabled?: boolean
   }
 }
 

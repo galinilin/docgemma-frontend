@@ -23,6 +23,8 @@ export const useSessionStore = defineStore('session', () => {
   const executingTool = ref<{ name: string; args: Record<string, unknown> } | null>(null)
   const agentStatusText = ref<string>('')
   const error = ref<{ message: string; recoverable: boolean } | null>(null)
+  const selectedPatientId = ref<string | null>(null)
+  const toolCallingEnabled = ref<boolean>(true)
 
   // Computed
   const isProcessing = computed(() => status.value === 'processing')
@@ -138,6 +140,11 @@ export const useSessionStore = defineStore('session', () => {
     error.value = null
   }
 
+  function resetControls() {
+    selectedPatientId.value = null
+    toolCallingEnabled.value = true
+  }
+
   return {
     // State
     sessionId,
@@ -150,6 +157,8 @@ export const useSessionStore = defineStore('session', () => {
     executingTool,
     agentStatusText,
     error,
+    selectedPatientId,
+    toolCallingEnabled,
 
     // Computed
     isProcessing,
@@ -176,5 +185,6 @@ export const useSessionStore = defineStore('session', () => {
     clearError,
     resetTurnState,
     resetState,
+    resetControls,
   }
 })

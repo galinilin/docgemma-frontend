@@ -131,6 +131,20 @@ export function useApi() {
     }
   }
 
+  // Patients
+  async function listPatients(): Promise<{ patients: Array<{ patient_id: string; name: string; dob: string; gender: string | null; specialty: string | null }>; total: number; error?: string | null }> {
+    loading.value = true
+    error.value = null
+    try {
+      return await fetchJson('/patients')
+    } catch (e) {
+      error.value = e as ApiError
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
@@ -139,5 +153,6 @@ export function useApi() {
     listSessions,
     getSession,
     deleteSession,
+    listPatients,
   }
 }

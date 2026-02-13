@@ -28,6 +28,7 @@ export interface SessionResponse {
   status: SessionStatus
   messages: Message[]
   pending_approval: PendingToolApproval | null
+  selected_patient_id: string | null
   created_at: string
   updated_at: string
 }

@@ -139,6 +139,8 @@ export function useWebSocket() {
       data: {
         content,
         image_base64: imageBase64 || null,
+        patient_id: sessionStore.selectedPatientId || null,
+        tool_calling_enabled: sessionStore.toolCallingEnabled,
       },
     })
   }

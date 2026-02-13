@@ -24,6 +24,7 @@ watch(error, (newError) => {
 onMounted(() => {
   // Start with a clean slate — session created lazily on first message
   sessionStore.resetState()
+  sessionStore.resetControls()
   sessionStore.sessionId = null
 })
 
@@ -71,6 +72,7 @@ function handleNewSession() {
   console.log('[ChatView] handleNewSession called')
   ws.disconnect()
   sessionStore.resetState()
+  sessionStore.resetControls()
   sessionStore.sessionId = null
 }
 
@@ -81,12 +83,16 @@ async function handleSelectSession(sessionId: string) {
   try {
     ws.disconnect()
     sessionStore.resetState()
+    sessionStore.resetControls()
 
     const session = await api.getSession(sessionId)
     sessionStore.setSession(session.session_id)
     if (session.messages.length > 0) {
       sessionStore.setMessages(session.messages)
     }
+
+    // Restore persisted patient selection (PatientSelector validates against EHR)
+    sessionStore.selectedPatientId = session.selected_patient_id ?? null
 
     ws.connect(session.session_id)
   } catch (err) {
