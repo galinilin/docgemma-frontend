@@ -18,7 +18,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   send: [content: string, imageBase64?: string]
   cancel: []
-  imageChange: [hasImage: boolean]
 }>()
 
 const inputText = ref('')
@@ -65,7 +64,6 @@ function handleFileSelect(e: Event) {
     imagePreview.value = result
     // Extract base64 data (remove data:image/...;base64, prefix)
     imageBase64.value = result.split(',')[1]
-    emit('imageChange', true)
   }
   reader.readAsDataURL(file)
 
@@ -76,7 +74,6 @@ function handleFileSelect(e: Event) {
 function clearImage() {
   imagePreview.value = null
   imageBase64.value = null
-  emit('imageChange', false)
 }
 </script>
 

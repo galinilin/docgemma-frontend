@@ -24,7 +24,7 @@ const iconBg = {
 }[props.step.type]
 
 const isReasoningOpen = ref(true)
-const isDetailOpen = ref(props.step.tool_name === 'analyze_medical_image')
+const isDetailOpen = ref(true)
 
 const renderedReasoning = computed(() =>
   props.step.reasoning_text ? md.render(props.step.reasoning_text) : ''

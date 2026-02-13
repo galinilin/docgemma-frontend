@@ -75,7 +75,7 @@ const responseDuration = computed(() => {
       </div>
 
       <!-- Message content -->
-      <div class="space-y-1">
+      <div class="space-y-1 flex-1 min-w-0">
         <div
           v-if="isAssistant"
           class="px-4 py-2 rounded-lg markdown-body"
