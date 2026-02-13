@@ -11,6 +11,7 @@ export interface TraceStep {
   duration_ms?: number
   tool_name?: string
   tool_result_summary?: string
+  tool_result_detail?: string
   success?: boolean
   reasoning_text?: string
 }
