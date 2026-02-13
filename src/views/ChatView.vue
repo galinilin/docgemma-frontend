@@ -82,11 +82,14 @@ async function handleSelectSession(sessionId: string) {
 
   try {
     ws.disconnect()
+
+    // Fetch session data BEFORE resetting state to avoid starter screen flash
+    const session = await api.getSession(sessionId)
+
     sessionStore.resetState()
     sessionStore.resetControls()
 
-    const session = await api.getSession(sessionId)
-    sessionStore.setSession(session.session_id)
+    sessionStore.sessionId = session.session_id
     if (session.messages.length > 0) {
       sessionStore.setMessages(session.messages)
     }

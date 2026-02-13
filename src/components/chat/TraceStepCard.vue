@@ -23,7 +23,7 @@ const iconBg = {
   synthesis: 'bg-green-100 text-green-600',
 }[props.step.type]
 
-const isReasoningOpen = ref(false)
+const isReasoningOpen = ref(true)
 const renderedReasoning = computed(() =>
   props.step.reasoning_text ? md.render(props.step.reasoning_text) : ''
 )

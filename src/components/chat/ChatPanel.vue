@@ -17,6 +17,14 @@ const sessionStore = useSessionStore()
 const scrollContainer = ref<HTMLDivElement | null>(null)
 
 const isStarterMode = computed(() => sessionStore.messages.length === 0)
+const hasImage = ref(false)
+
+function handleImageChange(value: boolean) {
+  hasImage.value = value
+  if (value) {
+    sessionStore.toolCallingEnabled = true
+  }
+}
 
 const GREETINGS = [
   'How can I help?',
@@ -76,11 +84,12 @@ watch(() => sessionStore.messages.length, () => {
             :loading="sessionStore.isProcessing"
             @send="handleSend"
             @cancel="handleCancel"
+            @image-change="handleImageChange"
           />
           <!-- Controls + hint row -->
           <div class="max-w-[60%] mx-auto flex items-center gap-2 mt-2 px-6">
             <PatientSelector />
-            <ToolModeSwitch />
+            <ToolModeSwitch :locked="hasImage" />
             <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>
           </div>
         </div>
@@ -115,11 +124,12 @@ watch(() => sessionStore.messages.length, () => {
           :loading="sessionStore.isProcessing"
           @send="handleSend"
           @cancel="handleCancel"
+          @image-change="handleImageChange"
         />
         <!-- Controls + hint row -->
         <div class="max-w-[60%] mx-auto flex items-center gap-2 -mt-1 pb-3 px-6">
           <PatientSelector />
-          <ToolModeSwitch />
+          <ToolModeSwitch :locked="hasImage" />
           <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>
         </div>
       </div>
