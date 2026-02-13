@@ -113,7 +113,7 @@ const responseDuration = computed(() => {
               class="w-4 h-4 transition-transform"
               :class="{ 'rotate-180': isTraceOpen }"
             />
-            {{ isTraceOpen ? 'Hide' : 'Show' }} reasoning ({{ trace?.tools_consulted }} source(s))
+            {{ isTraceOpen ? 'Hide' : 'Show' }} steps ({{ trace?.tools_consulted }} source(s))
           </button>
         </div>
         <ReasoningDrawer v-if="hasTrace && trace" :trace="trace" :is-open="isTraceOpen" />
