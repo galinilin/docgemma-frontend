@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { PaperAirplaneIcon, PhotoIcon, XMarkIcon, StopIcon } from '@heroicons/vue/24/solid'
+import { useSessionStore } from '@/stores/sessionStore'
 
 const props = withDefaults(
   defineProps<{
@@ -20,11 +21,22 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const sessionStore = useSessionStore()
+
 const inputText = ref('')
 const imagePreview = ref<string | null>(null)
 const imageBase64 = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const focused = ref(false)
+
+// Pick up pending image attachment from store (e.g. from ImagingViewer "Attach to Chat")
+watch(() => sessionStore.pendingImageAttachment, (attachment) => {
+  if (attachment) {
+    imageBase64.value = attachment.base64
+    imagePreview.value = `data:image/jpeg;base64,${attachment.base64}`
+    sessionStore.clearPendingImageAttachment()
+  }
+})
 
 function handleSubmit() {
   const text = inputText.value.trim()

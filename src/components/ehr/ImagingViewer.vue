@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { XMarkIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { XMarkIcon, TrashIcon, PaperClipIcon } from '@heroicons/vue/24/outline'
 import { usePatientApi } from '@/composables/usePatientApi'
 import type { ImagingStudyInfo } from '@/types'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   study: ImagingStudyInfo
-}>()
+  showAttach?: boolean
+}>(), {
+  showAttach: false,
+})
 
 const emit = defineEmits<{
   close: []
   deleted: []
+  attach: [payload: { base64: string; previewUrl: string; description: string }]
 }>()
 
 const api = usePatientApi()
 const showConfirm = ref(false)
 const isDeleting = ref(false)
+const isAttaching = ref(false)
 const deleteError = ref<string | null>(null)
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -42,6 +47,35 @@ function formatContentType(ct: string): string {
   if (ct === 'image/jpeg') return 'JPEG'
   if (ct === 'image/png') return 'PNG'
   return ct
+}
+
+async function handleAttach() {
+  // Use the original /api/... path so it goes through Vite's dev proxy (avoids CORS)
+  const fetchUrl = props.study.image_url
+  if (!fetchUrl) return
+  isAttaching.value = true
+  try {
+    const response = await fetch(fetchUrl)
+    const blob = await response.blob()
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const dataUrl = reader.result as string
+        resolve(dataUrl.split(',')[1])
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+    const modality = props.study.modality_display || props.study.modality || 'Image'
+    const site = props.study.body_site ? ` - ${props.study.body_site}` : ''
+    const date = props.study.study_date ? ` (${formatDate(props.study.study_date)})` : ''
+    const description = `${modality}${site}${date}`
+    emit('attach', { base64, previewUrl: fullImageUrl.value, description })
+  } catch (err) {
+    console.error('Failed to attach image:', err)
+  } finally {
+    isAttaching.value = false
+  }
 }
 
 async function handleDelete() {
@@ -131,10 +165,21 @@ async function handleDelete() {
           </div>
         </div>
 
-        <!-- Delete section -->
-        <div class="px-4 py-3 border-t border-gray-200">
+        <!-- Actions -->
+        <div class="px-4 py-3 border-t border-gray-200 space-y-2">
+          <!-- Attach to Chat (only in embedded/chat context) -->
+          <button
+            v-if="showAttach"
+            @click="handleAttach"
+            :disabled="isAttaching"
+            class="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-cyan-700 hover:bg-cyan-50 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <PaperClipIcon class="h-4 w-4" />
+            {{ isAttaching ? 'Attaching...' : 'Attach to Chat' }}
+          </button>
+
           <!-- Error -->
-          <div v-if="deleteError" class="mb-2 text-xs text-red-600">
+          <div v-if="deleteError" class="text-xs text-red-600">
             {{ deleteError }}
           </div>
 

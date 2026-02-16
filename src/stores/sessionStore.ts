@@ -25,6 +25,11 @@ export const useSessionStore = defineStore('session', () => {
   const error = ref<{ message: string; recoverable: boolean } | null>(null)
   const selectedPatientId = ref<string | null>(null)
   const toolCallingEnabled = ref<boolean>(true)
+  const pendingImageAttachment = ref<{
+    base64: string
+    previewUrl: string
+    description: string
+  } | null>(null)
 
   // Computed
   const isProcessing = computed(() => status.value === 'processing')
@@ -140,6 +145,14 @@ export const useSessionStore = defineStore('session', () => {
     error.value = null
   }
 
+  function setPendingImageAttachment(attachment: { base64: string; previewUrl: string; description: string }) {
+    pendingImageAttachment.value = attachment
+  }
+
+  function clearPendingImageAttachment() {
+    pendingImageAttachment.value = null
+  }
+
   function resetControls() {
     selectedPatientId.value = null
     toolCallingEnabled.value = true
@@ -159,6 +172,7 @@ export const useSessionStore = defineStore('session', () => {
     error,
     selectedPatientId,
     toolCallingEnabled,
+    pendingImageAttachment,
 
     // Computed
     isProcessing,
@@ -186,5 +200,7 @@ export const useSessionStore = defineStore('session', () => {
     resetTurnState,
     resetState,
     resetControls,
+    setPendingImageAttachment,
+    clearPendingImageAttachment,
   }
 })

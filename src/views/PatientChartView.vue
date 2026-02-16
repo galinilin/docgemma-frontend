@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from '@heroicons/vue/24/outline'
 import { useEhrStore } from '@/stores/ehrStore'
+import { useSessionStore } from '@/stores/sessionStore'
 import { usePatientApi } from '@/composables/usePatientApi'
 import AddAllergyModal from '@/components/ehr/AddAllergyModal.vue'
 import AddMedicationModal from '@/components/ehr/AddMedicationModal.vue'
@@ -37,6 +38,7 @@ const effectivePatientId = computed(() => props.patientId ?? null)
 
 const router = useRouter()
 const ehrStore = useEhrStore()
+const sessionStore = useSessionStore()
 const api = usePatientApi()
 const expandedNotes = ref<Set<string>>(new Set())
 
@@ -112,6 +114,14 @@ async function handleNoteAdded() {
 async function handleImagingAdded() {
   ehrStore.closeUploadImagingModal()
   await loadPatientChart()
+}
+
+function handleImagingAttach(payload: { base64: string; previewUrl: string; description: string }) {
+  sessionStore.setPendingImageAttachment(payload)
+  ehrStore.closeImagingViewer()
+  if (!props.embedded) {
+    router.push('/')
+  }
 }
 
 async function handleImagingDeleted() {
@@ -566,8 +576,10 @@ function resolveImageUrl(url: string): string {
     <ImagingViewer
       v-if="ehrStore.showImagingViewer && ehrStore.selectedImagingStudy"
       :study="ehrStore.selectedImagingStudy"
+      :show-attach="embedded"
       @close="ehrStore.closeImagingViewer"
       @deleted="handleImagingDeleted"
+      @attach="handleImagingAttach"
     />
   </div>
 </template>
