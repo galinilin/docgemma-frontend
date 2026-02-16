@@ -211,7 +211,9 @@ export function usePatientApi() {
     modality: string,
     bodySite?: string,
     studyDate?: string,
-    description?: string
+    description?: string,
+    report?: string,
+    reportAuthor?: string
   ): Promise<ImagingResponse> {
     loading.value = true
     error.value = null
@@ -222,6 +224,8 @@ export function usePatientApi() {
       formData.append('body_site', bodySite || '')
       formData.append('study_date', studyDate || '')
       formData.append('description', description || '')
+      formData.append('report', report || '')
+      formData.append('report_author', reportAuthor || '')
 
       const response = await fetch(
         `${API_BASE}/patients/${patientId}/imaging`,

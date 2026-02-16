@@ -83,6 +83,8 @@ export interface ImagingStudyInfo {
   body_site: string | null
   study_date: string | null
   description: string | null
+  report: string | null
+  report_author: string | null
   content_type: string
   image_url: string
 }

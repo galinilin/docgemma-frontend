@@ -20,6 +20,8 @@ const modality = ref('CT')
 const bodySite = ref('')
 const studyDate = ref('')
 const description = ref('')
+const report = ref('')
+const reportAuthor = ref('')
 const isSubmitting = ref(false)
 const error = ref<string | null>(null)
 
@@ -80,6 +82,8 @@ async function handleSubmit() {
       bodySite.value.trim() || undefined,
       studyDate.value || undefined,
       description.value.trim() || undefined,
+      report.value.trim() || undefined,
+      reportAuthor.value.trim() || undefined,
     )
 
     if (response.error) {
@@ -216,6 +220,25 @@ async function handleSubmit() {
             rows="2"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none"
             placeholder="e.g., Rule out pneumonia, follow-up fracture healing"
+          ></textarea>
+        </div>
+
+        <!-- Report -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Specialist Report
+          </label>
+          <input
+            v-model="reportAuthor"
+            type="text"
+            class="w-full px-3 py-2 mb-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+            placeholder="Reporting specialist, e.g., Dr. Smith, Radiologist"
+          />
+          <textarea
+            v-model="report"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none"
+            placeholder="e.g., No acute cardiopulmonary abnormality. Heart size normal. Lungs are clear bilaterally."
           ></textarea>
         </div>
 
