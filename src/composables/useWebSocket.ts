@@ -145,11 +145,11 @@ export function useWebSocket() {
     })
   }
 
-  function approveTool() {
+  function approveTool(editedArgs?: Record<string, unknown>) {
     sessionStore.clearPendingApproval()
     return send({
       action: 'approve_tool',
-      data: {},
+      data: editedArgs ? { edited_args: editedArgs } : {},
     })
   }
 

@@ -28,8 +28,8 @@ onMounted(() => {
   sessionStore.sessionId = null
 })
 
-function handleApprove() {
-  ws.approveTool()
+function handleApprove(editedArgs?: Record<string, unknown>) {
+  ws.approveTool(editedArgs)
 }
 
 function handleReject(reason?: string) {

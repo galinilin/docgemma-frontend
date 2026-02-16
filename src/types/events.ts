@@ -104,7 +104,9 @@ export interface SendMessageAction {
 
 export interface ApproveToolAction {
   action: 'approve_tool'
-  data: Record<string, never>
+  data: {
+    edited_args?: Record<string, unknown>
+  }
 }
 
 export interface RejectToolAction {
