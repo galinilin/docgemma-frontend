@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   ArrowLeftIcon,
   UserIcon,
+  XMarkIcon,
   ExclamationTriangleIcon,
   BeakerIcon,
   HeartIcon,
@@ -18,9 +19,18 @@ import AddAllergyModal from '@/components/ehr/AddAllergyModal.vue'
 import AddMedicationModal from '@/components/ehr/AddMedicationModal.vue'
 import AddNoteModal from '@/components/ehr/AddNoteModal.vue'
 
-const props = defineProps<{
-  patientId: string
+const props = withDefaults(defineProps<{
+  patientId?: string
+  embedded?: boolean
+}>(), {
+  embedded: false,
+})
+
+const emit = defineEmits<{
+  close: []
 }>()
+
+const effectivePatientId = computed(() => props.patientId ?? null)
 
 const router = useRouter()
 const ehrStore = useEhrStore()
@@ -39,16 +49,18 @@ onMounted(async () => {
   await loadPatientChart()
 })
 
-watch(() => props.patientId, async () => {
+watch(effectivePatientId, async () => {
   await loadPatientChart()
 })
 
 async function loadPatientChart() {
+  const pid = effectivePatientId.value
+  if (!pid) return
   ehrStore.setLoading(true)
   ehrStore.clearError()
-  ehrStore.setSelectedPatient(props.patientId)
+  ehrStore.setSelectedPatient(pid)
   try {
-    const chart = await api.getPatientChart(props.patientId)
+    const chart = await api.getPatientChart(pid)
     if (chart.error) {
       ehrStore.setError(chart.error)
     } else {
@@ -97,8 +109,8 @@ async function handleNoteAdded() {
 
 <template>
   <div class="h-full flex flex-col bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4">
+    <!-- Full Header (standalone mode) -->
+    <header v-if="!embedded" class="bg-white border-b border-gray-200 px-6 py-4">
       <div class="flex items-center gap-4">
         <button
           @click="goBack"
@@ -126,8 +138,27 @@ async function handleNoteAdded() {
       </div>
     </header>
 
+    <!-- Compact Header (embedded mode) -->
+    <header v-if="embedded" class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+      <div v-if="ehrStore.currentChart" class="flex items-center gap-2 min-w-0">
+        <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <UserIcon class="h-4 w-4 text-blue-600" />
+        </div>
+        <span class="font-medium text-gray-900 truncate text-sm">{{ ehrStore.currentChart.name }}</span>
+        <span class="text-xs text-gray-400">DOB: {{ formatDate(ehrStore.currentChart.dob) }}</span>
+        <span v-if="ehrStore.currentChart.gender" class="text-xs text-gray-400 capitalize">{{ ehrStore.currentChart.gender }}</span>
+      </div>
+      <div v-else class="text-sm text-gray-400">Loading...</div>
+      <button
+        @click="emit('close')"
+        class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
+      >
+        <XMarkIcon class="h-4 w-4" />
+      </button>
+    </header>
+
     <!-- Content -->
-    <div class="flex-1 overflow-auto p-6">
+    <div class="flex-1 overflow-auto" :class="embedded ? 'p-4' : 'p-6'">
       <!-- Loading -->
       <div v-if="ehrStore.isLoading" class="flex items-center justify-center h-64">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -434,22 +465,22 @@ async function handleNoteAdded() {
 
     <!-- Modals -->
     <AddAllergyModal
-      v-if="ehrStore.showAddAllergyModal"
-      :patient-id="patientId"
+      v-if="ehrStore.showAddAllergyModal && effectivePatientId"
+      :patient-id="effectivePatientId"
       @close="ehrStore.closeAddAllergyModal"
       @added="handleAllergyAdded"
     />
 
     <AddMedicationModal
-      v-if="ehrStore.showAddMedicationModal"
-      :patient-id="patientId"
+      v-if="ehrStore.showAddMedicationModal && effectivePatientId"
+      :patient-id="effectivePatientId"
       @close="ehrStore.closeAddMedicationModal"
       @added="handleMedicationAdded"
     />
 
     <AddNoteModal
-      v-if="ehrStore.showAddNoteModal"
-      :patient-id="patientId"
+      v-if="ehrStore.showAddNoteModal && effectivePatientId"
+      :patient-id="effectivePatientId"
       @close="ehrStore.closeAddNoteModal"
       @added="handleNoteAdded"
     />

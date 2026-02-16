@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { AppLayout } from '@/components/layout'
+import { AppLayout, SplitPane } from '@/components/layout'
 import { ChatPanel } from '@/components/chat'
 import { ToolApprovalModal } from '@/components/tools'
 import { ErrorBanner } from '@/components/common'
+import PatientChartView from '@/views/PatientChartView.vue'
 import { useSessionStore } from '@/stores'
 import { useApi, useWebSocket } from '@/composables'
 
@@ -12,7 +13,9 @@ const api = useApi()
 const ws = useWebSocket()
 
 const appLayoutRef = ref<InstanceType<typeof AppLayout> | null>(null)
+const splitSize = ref(60)
 
+const showChartPanel = computed(() => sessionStore.selectedPatientId !== null)
 const showApprovalModal = computed(() => sessionStore.pendingApproval !== null)
 const error = computed(() => sessionStore.error)
 
@@ -59,6 +62,10 @@ async function handleSendMessage(content: string, imageBase64?: string) {
   }
 
   ws.sendMessage(content, imageBase64)
+}
+
+function closeChartPanel() {
+  sessionStore.selectedPatientId = null
 }
 
 function handleCancel() {
@@ -121,7 +128,18 @@ async function handleDeleteSession(sessionId: string) {
     @delete-session="handleDeleteSession"
   >
     <template #chat>
-      <ChatPanel @send-message="handleSendMessage" @cancel="handleCancel" />
+      <!-- No patient selected: full-width chat -->
+      <ChatPanel v-if="!showChartPanel" @send-message="handleSendMessage" @cancel="handleCancel" />
+
+      <!-- Patient selected: split chat + chart -->
+      <SplitPane v-else :size="splitSize" :min="35" :max="75" @update:size="splitSize = $event">
+        <template #left>
+          <ChatPanel @send-message="handleSendMessage" @cancel="handleCancel" />
+        </template>
+        <template #right>
+          <PatientChartView :patient-id="sessionStore.selectedPatientId!" embedded @close="closeChartPanel" />
+        </template>
+      </SplitPane>
     </template>
   </AppLayout>
 
