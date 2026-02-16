@@ -530,13 +530,33 @@ function resolveImageUrl(url: string): string {
               <li
                 v-for="(note, index) in ehrStore.notes"
                 :key="note.id || `note-${index}`"
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                class="border border-gray-100 rounded-lg overflow-hidden"
               >
-                <div class="flex items-center gap-2">
-                  <DocumentTextIcon class="h-5 w-5 text-gray-400" />
-                  <span class="font-medium text-gray-900">{{ note.note_type }}</span>
+                <button
+                  @click="toggleNote(note.id || `note-${index}`)"
+                  class="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center gap-2">
+                    <DocumentTextIcon class="h-5 w-5 text-amber-500" />
+                    <span class="font-medium text-gray-900">{{ note.note_type }}</span>
+                    <span class="text-sm text-gray-500">{{ formatDate(note.date) }}</span>
+                  </div>
+                  <svg
+                    class="h-4 w-4 text-gray-400 transition-transform"
+                    :class="{ 'rotate-180': expandedNotes.has(note.id || `note-${index}`) }"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div
+                  v-if="expandedNotes.has(note.id || `note-${index}`) && note.preview"
+                  class="px-3 pb-3"
+                >
+                  <div class="text-sm text-gray-700 whitespace-pre-wrap max-h-64 overflow-y-auto bg-gray-50 rounded p-3">
+                    {{ note.preview }}
+                  </div>
                 </div>
-                <span class="text-sm text-gray-500">{{ formatDate(note.date) }}</span>
               </li>
             </ul>
           </div>
