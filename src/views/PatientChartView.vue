@@ -11,6 +11,7 @@ import {
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
   DocumentMagnifyingGlassIcon,
+  CameraIcon,
   PlusIcon,
 } from '@heroicons/vue/24/outline'
 import { useEhrStore } from '@/stores/ehrStore'
@@ -18,6 +19,8 @@ import { usePatientApi } from '@/composables/usePatientApi'
 import AddAllergyModal from '@/components/ehr/AddAllergyModal.vue'
 import AddMedicationModal from '@/components/ehr/AddMedicationModal.vue'
 import AddNoteModal from '@/components/ehr/AddNoteModal.vue'
+import UploadImagingModal from '@/components/ehr/UploadImagingModal.vue'
+import ImagingViewer from '@/components/ehr/ImagingViewer.vue'
 
 const props = withDefaults(defineProps<{
   patientId?: string
@@ -104,6 +107,26 @@ async function handleMedicationAdded() {
 async function handleNoteAdded() {
   ehrStore.closeAddNoteModal()
   await loadPatientChart()
+}
+
+async function handleImagingAdded() {
+  ehrStore.closeUploadImagingModal()
+  await loadPatientChart()
+}
+
+async function handleImagingDeleted() {
+  ehrStore.closeImagingViewer()
+  await loadPatientChart()
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
+
+function resolveImageUrl(url: string): string {
+  if (!url) return ''
+  if (url.startsWith('/api/')) {
+    return `${API_BASE}${url.slice(4)}`
+  }
+  return url
 }
 </script>
 
@@ -263,6 +286,54 @@ async function handleNoteAdded() {
                   {{ formatDate(vital.date) }}
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Imaging Studies -->
+        <section class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 bg-cyan-50 border-b border-cyan-100">
+            <div class="flex items-center gap-2">
+              <CameraIcon class="h-5 w-5 text-cyan-600" />
+              <h2 class="font-semibold text-cyan-900">Imaging Studies</h2>
+            </div>
+            <button
+              @click="ehrStore.openUploadImagingModal"
+              class="p-1 text-cyan-600 hover:bg-cyan-100 rounded transition-colors"
+            >
+              <PlusIcon class="h-5 w-5" />
+            </button>
+          </div>
+          <div class="p-4">
+            <div v-if="ehrStore.imagingStudies.length === 0" class="text-gray-500 text-sm">
+              No imaging studies
+            </div>
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <button
+                v-for="study in ehrStore.imagingStudies"
+                :key="study.id || study.image_url"
+                @click="ehrStore.openImagingViewer(study)"
+                class="group border border-gray-200 rounded-lg overflow-hidden hover:border-cyan-300 hover:shadow-md transition-all text-left"
+              >
+                <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <img
+                    :src="resolveImageUrl(study.image_url)"
+                    :alt="study.modality_display || 'Medical image'"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div class="p-2">
+                  <p class="text-xs font-medium text-gray-900 truncate">
+                    {{ study.modality_display || study.modality || 'Image' }}
+                  </p>
+                  <p v-if="study.body_site" class="text-xs text-gray-500 truncate">
+                    {{ study.body_site }}
+                  </p>
+                  <p v-if="study.study_date" class="text-xs text-gray-400">
+                    {{ formatDate(study.study_date) }}
+                  </p>
+                </div>
+              </button>
             </div>
           </div>
         </section>
@@ -483,6 +554,20 @@ async function handleNoteAdded() {
       :patient-id="effectivePatientId"
       @close="ehrStore.closeAddNoteModal"
       @added="handleNoteAdded"
+    />
+
+    <UploadImagingModal
+      v-if="ehrStore.showUploadImagingModal && effectivePatientId"
+      :patient-id="effectivePatientId"
+      @close="ehrStore.closeUploadImagingModal"
+      @added="handleImagingAdded"
+    />
+
+    <ImagingViewer
+      v-if="ehrStore.showImagingViewer && ehrStore.selectedImagingStudy"
+      :study="ehrStore.selectedImagingStudy"
+      @close="ehrStore.closeImagingViewer"
+      @deleted="handleImagingDeleted"
     />
   </div>
 </template>

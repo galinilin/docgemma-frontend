@@ -9,6 +9,7 @@ import type {
   AllergyResponse,
   MedicationResponse,
   NoteResponse,
+  ImagingResponse,
   AddAllergyRequest,
   PrescribeMedicationRequest,
   SaveNoteRequest,
@@ -201,6 +202,75 @@ export function usePatientApi() {
     }
   }
 
+  /**
+   * Upload an imaging study for a patient
+   */
+  async function uploadImaging(
+    patientId: string,
+    file: File,
+    modality: string,
+    bodySite?: string,
+    studyDate?: string,
+    description?: string
+  ): Promise<ImagingResponse> {
+    loading.value = true
+    error.value = null
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('modality', modality)
+      formData.append('body_site', bodySite || '')
+      formData.append('study_date', studyDate || '')
+      formData.append('description', description || '')
+
+      const response = await fetch(
+        `${API_BASE}/patients/${patientId}/imaging`,
+        { method: 'POST', body: formData }
+      )
+
+      if (!response.ok) {
+        let detail: string | undefined
+        try {
+          const errorData = await response.json()
+          detail = errorData.detail
+        } catch {
+          // Ignore JSON parse errors
+        }
+        const apiError: ApiError = {
+          status: response.status,
+          message: response.statusText,
+          detail,
+        }
+        throw apiError
+      }
+
+      return await response.json()
+    } catch (e) {
+      error.value = e as ApiError
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  /**
+   * Delete an imaging study
+   */
+  async function deleteImaging(mediaId: string): Promise<ImagingResponse> {
+    loading.value = true
+    error.value = null
+    try {
+      return await fetchJson<ImagingResponse>(`/imaging/${mediaId}`, {
+        method: 'DELETE',
+      })
+    } catch (e) {
+      error.value = e as ApiError
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
@@ -211,5 +281,7 @@ export function usePatientApi() {
     addAllergy,
     prescribeMedication,
     saveNote,
+    uploadImaging,
+    deleteImaging,
   }
 }

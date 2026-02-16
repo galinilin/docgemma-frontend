@@ -76,6 +76,24 @@ export interface VisitNote {
   content: string
 }
 
+export interface ImagingStudyInfo {
+  id: string | null
+  modality: string | null
+  modality_display: string | null
+  body_site: string | null
+  study_date: string | null
+  description: string | null
+  content_type: string
+  image_url: string
+}
+
+export interface ImagingResponse {
+  success: boolean
+  media_id: string | null
+  message: string
+  error: string | null
+}
+
 export interface PatientChart {
   patient_id: string
   name: string
@@ -89,6 +107,7 @@ export interface PatientChart {
   vitals: VitalSign[]
   screenings: ScreeningResult[]
   visit_notes: VisitNote[]
+  imaging_studies: ImagingStudyInfo[]
   error: string | null
 }
 

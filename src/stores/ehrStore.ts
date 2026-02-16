@@ -8,6 +8,7 @@ import type {
   PatientChart,
   AllergyInfo,
   MedicationInfo,
+  ImagingStudyInfo,
 } from '@/types'
 
 export const useEhrStore = defineStore('ehr', () => {
@@ -24,6 +25,9 @@ export const useEhrStore = defineStore('ehr', () => {
   const showAddMedicationModal = ref(false)
   const showAddNoteModal = ref(false)
   const showCreatePatientModal = ref(false)
+  const showUploadImagingModal = ref(false)
+  const showImagingViewer = ref(false)
+  const selectedImagingStudy = ref<ImagingStudyInfo | null>(null)
 
   // Computed
   const selectedPatient = computed(() =>
@@ -40,6 +44,7 @@ export const useEhrStore = defineStore('ehr', () => {
   const vitals = computed(() => currentChart.value?.vitals ?? [])
   const screenings = computed(() => currentChart.value?.screenings ?? [])
   const visitNotes = computed(() => currentChart.value?.visit_notes ?? [])
+  const imagingStudies = computed(() => currentChart.value?.imaging_studies ?? [])
 
   // Actions
   function setPatients(list: PatientSummary[]) {
@@ -124,6 +129,24 @@ export const useEhrStore = defineStore('ehr', () => {
     showCreatePatientModal.value = false
   }
 
+  function openUploadImagingModal() {
+    showUploadImagingModal.value = true
+  }
+
+  function closeUploadImagingModal() {
+    showUploadImagingModal.value = false
+  }
+
+  function openImagingViewer(study: ImagingStudyInfo) {
+    selectedImagingStudy.value = study
+    showImagingViewer.value = true
+  }
+
+  function closeImagingViewer() {
+    showImagingViewer.value = false
+    selectedImagingStudy.value = null
+  }
+
   function reset() {
     patients.value = []
     selectedPatientId.value = null
@@ -147,6 +170,9 @@ export const useEhrStore = defineStore('ehr', () => {
     showAddMedicationModal,
     showAddNoteModal,
     showCreatePatientModal,
+    showUploadImagingModal,
+    showImagingViewer,
+    selectedImagingStudy,
 
     // Computed
     selectedPatient,
@@ -159,6 +185,7 @@ export const useEhrStore = defineStore('ehr', () => {
     vitals,
     screenings,
     visitNotes,
+    imagingStudies,
 
     // Actions
     setPatients,
@@ -180,6 +207,10 @@ export const useEhrStore = defineStore('ehr', () => {
     closeAddNoteModal,
     openCreatePatientModal,
     closeCreatePatientModal,
+    openUploadImagingModal,
+    closeUploadImagingModal,
+    openImagingViewer,
+    closeImagingViewer,
 
     reset,
   }
