@@ -134,7 +134,7 @@ async function handleDeleteSession(sessionId: string) {
       <!-- Patient selected: split chat + chart -->
       <SplitPane v-else :size="splitSize" :min="35" :max="75" @update:size="splitSize = $event">
         <template #left>
-          <ChatPanel @send-message="handleSendMessage" @cancel="handleCancel" />
+          <ChatPanel compact @send-message="handleSendMessage" @cancel="handleCancel" />
         </template>
         <template #right>
           <PatientChartView :patient-id="sessionStore.selectedPatientId!" embedded @close="closeChartPanel" />

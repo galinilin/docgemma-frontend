@@ -8,6 +8,12 @@ import StreamingText from './StreamingText.vue'
 import PatientSelector from './PatientSelector.vue'
 import ToolModeSwitch from './ToolModeSwitch.vue'
 
+const props = withDefaults(defineProps<{
+  compact?: boolean
+}>(), {
+  compact: false,
+})
+
 const emit = defineEmits<{
   sendMessage: [content: string, imageBase64?: string]
   cancel: []
@@ -17,6 +23,7 @@ const sessionStore = useSessionStore()
 const scrollContainer = ref<HTMLDivElement | null>(null)
 
 const isStarterMode = computed(() => sessionStore.messages.length === 0)
+const contentMaxW = computed(() => props.compact ? 'max-w-full' : 'max-w-[60%]')
 
 const GREETINGS = [
   'How can I help?',
@@ -67,18 +74,19 @@ watch(() => sessionStore.messages.length, () => {
     <!-- Starter mode: centered input -->
     <template v-if="isStarterMode">
       <div class="flex-1 flex items-center justify-center">
-        <div class="w-full max-w-[60%] mx-auto px-4">
+        <div class="w-full mx-auto px-4" :class="contentMaxW">
           <h1 class="text-center text-2xl font-semibold mb-6 bg-gradient-to-r from-blue-500 via-indigo-400 to-violet-500 bg-clip-text text-transparent select-none">
             {{ greeting }}
           </h1>
           <ChatInput
             :disabled="!sessionStore.canSendMessage"
             :loading="sessionStore.isProcessing"
+            :compact="compact"
             @send="handleSend"
             @cancel="handleCancel"
           />
           <!-- Controls + hint row -->
-          <div class="max-w-[60%] mx-auto flex items-center gap-2 mt-2 px-6">
+          <div class="mx-auto flex items-center gap-2 mt-2 px-6" :class="contentMaxW">
             <PatientSelector />
             <ToolModeSwitch />
             <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>
@@ -91,18 +99,18 @@ watch(() => sessionStore.messages.length, () => {
     <template v-else>
       <!-- Messages + streaming + status (scrollable) -->
       <div ref="scrollContainer" class="flex-1 overflow-y-auto">
-        <MessageList :messages="sessionStore.messages" />
+        <MessageList :messages="sessionStore.messages" :compact="compact" />
 
         <!-- Agent status indicator -->
         <div v-if="sessionStore.agentStatusText && !sessionStore.streamingText" class="px-4 pb-4">
-          <div class="max-w-[60%] mx-auto">
+          <div class="mx-auto" :class="contentMaxW">
             <AgentStatusIndicator :text="sessionStore.agentStatusText" />
           </div>
         </div>
 
         <!-- Streaming response -->
         <div v-if="sessionStore.streamingText" class="px-4 pb-4">
-          <div class="max-w-[60%] mx-auto">
+          <div class="mx-auto" :class="contentMaxW">
             <StreamingText :text="sessionStore.streamingText" />
           </div>
         </div>
@@ -113,11 +121,12 @@ watch(() => sessionStore.messages.length, () => {
         <ChatInput
           :disabled="!sessionStore.canSendMessage"
           :loading="sessionStore.isProcessing"
+          :compact="compact"
           @send="handleSend"
           @cancel="handleCancel"
         />
         <!-- Controls + hint row -->
-        <div class="max-w-[60%] mx-auto flex items-center gap-2 -mt-1 pb-3 px-6">
+        <div class="mx-auto flex items-center gap-2 -mt-1 pb-3 px-6" :class="contentMaxW">
           <PatientSelector />
           <ToolModeSwitch />
           <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>

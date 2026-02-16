@@ -8,11 +8,13 @@ const props = withDefaults(
     disabled?: boolean
     loading?: boolean
     placeholder?: string
+    compact?: boolean
   }>(),
   {
     disabled: false,
     loading: false,
     placeholder: 'Ask a medical question...',
+    compact: false,
   }
 )
 
@@ -91,7 +93,7 @@ function clearImage() {
 
 <template>
   <div class="px-4 py-3">
-    <div class="max-w-[60%] mx-auto">
+    <div class="mx-auto" :class="compact ? 'max-w-full' : 'max-w-[60%]'">
       <!-- Card container -->
       <div
         class="rounded-2xl border bg-white transition-all duration-200"

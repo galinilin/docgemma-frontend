@@ -3,9 +3,12 @@ import { ref, watch, nextTick } from 'vue'
 import type { Message } from '@/types'
 import MessageBubble from './MessageBubble.vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   messages: Message[]
-}>()
+  compact?: boolean
+}>(), {
+  compact: false,
+})
 
 const listRef = ref<HTMLElement | null>(null)
 
@@ -24,7 +27,7 @@ watch(
 <template>
   <div ref="listRef" class="p-4">
     <!-- Centered container for messages -->
-    <div class="max-w-[60%] mx-auto space-y-4">
+    <div class="mx-auto space-y-4" :class="compact ? 'max-w-full' : 'max-w-[60%]'">
       <MessageBubble
         v-for="message in messages"
         :key="message.id"
