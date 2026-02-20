@@ -20,7 +20,9 @@ async function loadSessions() {
   isLoading.value = true
   try {
     const response = await api.listSessions()
-    sessions.value = response.sessions
+    sessions.value = response.sessions.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
   } catch (err) {
     console.error('Failed to load sessions:', err)
   } finally {

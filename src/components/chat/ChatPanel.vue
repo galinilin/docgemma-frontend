@@ -5,8 +5,10 @@ import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import AgentStatusIndicator from './AgentStatusIndicator.vue'
 import StreamingText from './StreamingText.vue'
+import StreamingThinking from './StreamingThinking.vue'
 import PatientSelector from './PatientSelector.vue'
 import ToolModeSwitch from './ToolModeSwitch.vue'
+import ThinkingModeSwitch from './ThinkingModeSwitch.vue'
 
 const props = withDefaults(defineProps<{
   compact?: boolean
@@ -58,10 +60,6 @@ watch(() => sessionStore.agentStatusText, () => {
   scrollToBottom()
 })
 
-// Auto-scroll when streaming text updates
-watch(() => sessionStore.streamingText, () => {
-  scrollToBottom()
-})
 
 // Auto-scroll when new messages are added
 watch(() => sessionStore.messages.length, () => {
@@ -89,6 +87,7 @@ watch(() => sessionStore.messages.length, () => {
           <div class="mx-auto flex items-center gap-2 mt-2 px-6" :class="contentMaxW">
             <PatientSelector />
             <ToolModeSwitch />
+            <ThinkingModeSwitch />
             <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>
           </div>
         </div>
@@ -101,8 +100,15 @@ watch(() => sessionStore.messages.length, () => {
       <div ref="scrollContainer" class="flex-1 overflow-y-auto">
         <MessageList :messages="sessionStore.messages" :compact="compact" />
 
+        <!-- Streaming thinking (amber section) -->
+        <div v-if="sessionStore.streamingThinkingText" class="px-4 pb-4">
+          <div class="mx-auto" :class="contentMaxW">
+            <StreamingThinking :text="sessionStore.streamingThinkingText" :streaming="sessionStore.isThinkingStreaming" />
+          </div>
+        </div>
+
         <!-- Agent status indicator -->
-        <div v-if="sessionStore.agentStatusText && !sessionStore.streamingText" class="px-4 pb-4">
+        <div v-if="sessionStore.agentStatusText && !sessionStore.streamingText && !sessionStore.isThinkingStreaming" class="px-4 pb-4">
           <div class="mx-auto" :class="contentMaxW">
             <AgentStatusIndicator :text="sessionStore.agentStatusText" />
           </div>
@@ -129,6 +135,7 @@ watch(() => sessionStore.messages.length, () => {
         <div class="mx-auto flex items-center gap-2 -mt-1 pb-3 px-6" :class="contentMaxW">
           <PatientSelector />
           <ToolModeSwitch />
+          <ThinkingModeSwitch />
           <span class="ml-auto text-[11px] text-gray-300 whitespace-nowrap">Enter to send · Shift+Enter for newline</span>
         </div>
       </div>

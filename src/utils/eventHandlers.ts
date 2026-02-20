@@ -22,6 +22,11 @@ export function handleEvent(event: unknown): void {
       break
 
     case 'agent_status':
+      // When a status update arrives after thinking was streaming,
+      // the thinking phase is done — stop the streaming indicator.
+      if (sessionStore.isThinkingStreaming) {
+        sessionStore.isThinkingStreaming = false
+      }
       sessionStore.setAgentStatusText(e.status_text)
       break
 
@@ -51,7 +56,12 @@ export function handleEvent(event: unknown): void {
 
     case 'streaming_text':
       sessionStore.clearAgentStatusText()
-      sessionStore.appendStreamingText(e.text)
+      if (e.node_id === 'preliminary_thinking') {
+        sessionStore.isThinkingStreaming = true
+        sessionStore.appendStreamingThinkingText(e.text)
+      } else {
+        sessionStore.appendStreamingText(e.text)
+      }
       break
 
     case 'completion':
@@ -62,9 +72,11 @@ export function handleEvent(event: unknown): void {
         metadata: {
           tool_calls_made: e.tool_calls_made,
           clinical_trace: e.clinical_trace,
+          preliminary_thinking: e.preliminary_thinking,
         },
       })
       sessionStore.clearStreamingText()
+      sessionStore.clearStreamingThinkingText()
       sessionStore.clearAgentStatusText()
       sessionStore.setStatus('active')
       sessionStore.resetTurnState()
@@ -75,6 +87,7 @@ export function handleEvent(event: unknown): void {
       sessionStore.setError(e.message, e.recoverable)
       sessionStore.clearAgentStatusText()
       sessionStore.clearStreamingText()
+      sessionStore.clearStreamingThinkingText()
       if (!e.recoverable) {
         sessionStore.setStatus('error')
       }

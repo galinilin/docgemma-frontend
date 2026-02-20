@@ -20,11 +20,14 @@ export const useSessionStore = defineStore('session', () => {
   const subtasks = ref<Subtask[]>([])
   const toolResults = ref<ToolResult[]>([])
   const streamingText = ref<string>('')
+  const streamingThinkingText = ref<string>('')
+  const isThinkingStreaming = ref<boolean>(false)
   const executingTool = ref<{ name: string; args: Record<string, unknown> } | null>(null)
   const agentStatusText = ref<string>('')
   const error = ref<{ message: string; recoverable: boolean } | null>(null)
   const selectedPatientId = ref<string | null>(null)
   const toolCallingEnabled = ref<boolean>(true)
+  const thinkingEnabled = ref<boolean>(false)
   const pendingImageAttachment = ref<{
     base64: string
     previewUrl: string
@@ -116,6 +119,14 @@ export const useSessionStore = defineStore('session', () => {
     streamingText.value = ''
   }
 
+  function appendStreamingThinkingText(text: string) {
+    streamingThinkingText.value += text
+  }
+
+  function clearStreamingThinkingText() {
+    streamingThinkingText.value = ''
+  }
+
   function setError(message: string, recoverable: boolean) {
     console.log('[SessionStore] setError called:', { message, recoverable })
     error.value = { message, recoverable }
@@ -131,6 +142,8 @@ export const useSessionStore = defineStore('session', () => {
     toolResults.value = []
     executingTool.value = null
     agentStatusText.value = ''
+    streamingThinkingText.value = ''
+    isThinkingStreaming.value = false
   }
 
   function resetState() {
@@ -140,6 +153,8 @@ export const useSessionStore = defineStore('session', () => {
     subtasks.value = []
     toolResults.value = []
     streamingText.value = ''
+    streamingThinkingText.value = ''
+    isThinkingStreaming.value = false
     executingTool.value = null
     agentStatusText.value = ''
     error.value = null
@@ -156,6 +171,7 @@ export const useSessionStore = defineStore('session', () => {
   function resetControls() {
     selectedPatientId.value = null
     toolCallingEnabled.value = true
+    thinkingEnabled.value = false
   }
 
   return {
@@ -167,11 +183,14 @@ export const useSessionStore = defineStore('session', () => {
     subtasks,
     toolResults,
     streamingText,
+    streamingThinkingText,
+    isThinkingStreaming,
     executingTool,
     agentStatusText,
     error,
     selectedPatientId,
     toolCallingEnabled,
+    thinkingEnabled,
     pendingImageAttachment,
 
     // Computed
@@ -195,6 +214,8 @@ export const useSessionStore = defineStore('session', () => {
     clearAgentStatusText,
     appendStreamingText,
     clearStreamingText,
+    appendStreamingThinkingText,
+    clearStreamingThinkingText,
     setError,
     clearError,
     resetTurnState,

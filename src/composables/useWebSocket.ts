@@ -141,6 +141,7 @@ export function useWebSocket() {
         image_base64: imageBase64 || null,
         patient_id: sessionStore.selectedPatientId || null,
         tool_calling_enabled: sessionStore.toolCallingEnabled,
+        thinking_enabled: sessionStore.thinkingEnabled,
       },
     })
   }

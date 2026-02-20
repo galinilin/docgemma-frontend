@@ -69,6 +69,7 @@ export interface CompletionEvent extends BaseEvent {
   final_response: string
   tool_calls_made: number
   clinical_trace?: ClinicalTrace
+  preliminary_thinking?: string
 }
 
 // Error event
@@ -99,6 +100,7 @@ export interface SendMessageAction {
     image_base64?: string | null
     patient_id?: string | null
     tool_calling_enabled?: boolean
+    thinking_enabled?: boolean
   }
 }
 

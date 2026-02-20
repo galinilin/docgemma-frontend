@@ -4,7 +4,7 @@ import MarkdownIt from 'markdown-it'
 import type { Message } from '@/types'
 import type { ClinicalTrace } from '@/types/trace'
 import { UserIcon, CpuChipIcon, WrenchIcon } from '@heroicons/vue/24/solid'
-import { ChevronDownIcon } from '@heroicons/vue/24/solid'
+import { ChevronDownIcon, LightBulbIcon } from '@heroicons/vue/24/solid'
 import ReasoningDrawer from './ReasoningDrawer.vue'
 
 const md = new MarkdownIt({ linkify: true, breaks: true })
@@ -19,6 +19,11 @@ const isAssistant = computed(() => props.message.role === 'assistant')
 const trace = computed(() => props.message.metadata?.clinical_trace as ClinicalTrace | undefined)
 const hasTrace = computed(() => isAssistant.value && (trace.value?.steps?.length ?? 0) > 0)
 const isTraceOpen = ref(false)
+
+const preliminaryThinking = computed(() => props.message.metadata?.preliminary_thinking as string | undefined)
+const hasThinking = computed(() => isAssistant.value && !!preliminaryThinking.value)
+const isThinkingOpen = ref(false)
+const renderedThinking = computed(() => preliminaryThinking.value ? md.render(preliminaryThinking.value) : '')
 
 const bubbleClasses = computed(() => {
   if (isUser.value) {
@@ -76,6 +81,21 @@ const responseDuration = computed(() => {
 
       <!-- Message content -->
       <div class="space-y-1 flex-1 min-w-0">
+        <!-- Thinking section (collapsible, gray) -->
+        <div v-if="hasThinking" class="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+          <button
+            @click="isThinkingOpen = !isThinkingOpen"
+            class="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <LightBulbIcon class="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Agent Thinking</span>
+            <ChevronDownIcon
+              class="w-3.5 h-3.5 ml-auto transition-transform"
+              :class="{ 'rotate-180': isThinkingOpen }"
+            />
+          </button>
+          <div v-if="isThinkingOpen" class="px-3 pb-2 text-sm text-gray-700 thinking-body" v-html="renderedThinking" />
+        </div>
         <div
           v-if="isAssistant"
           class="px-4 py-2 rounded-lg markdown-body"
@@ -213,5 +233,46 @@ const responseDuration = computed(() => {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 0.75rem 0;
+}
+
+/* Thinking section markdown styles */
+.thinking-body :deep(p) {
+  margin: 0.375rem 0;
+}
+.thinking-body :deep(p:first-child) {
+  margin-top: 0;
+}
+.thinking-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.thinking-body :deep(ul),
+.thinking-body :deep(ol) {
+  margin: 0.375rem 0;
+  padding-left: 1.5rem;
+}
+.thinking-body :deep(ul) {
+  list-style-type: disc;
+}
+.thinking-body :deep(ol) {
+  list-style-type: decimal;
+}
+.thinking-body :deep(li) {
+  margin: 0.125rem 0;
+}
+.thinking-body :deep(strong) {
+  font-weight: 700;
+}
+.thinking-body :deep(em) {
+  font-style: italic;
+}
+.thinking-body :deep(code) {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+.thinking-body :deep(a) {
+  color: #4b5563;
+  text-decoration: underline;
 }
 </style>
