@@ -1,6 +1,8 @@
 # DocGemma Frontend
 
 > **Part of the DocGemma project:** [docgemma-app](https://github.com/galinilin/docgemma-app) (Docker deployment) | [docgemma-connect](https://github.com/galinilin/docgemma-connect) (FastAPI backend)
+>
+> **Competition:** [The MedGemma Impact Challenge](https://www.kaggle.com/competitions/med-gemma-impact-challenge) on Kaggle
 
 Vue 3 web interface for DocGemma, a medical AI assistant with integrated EHR management. Provides real-time chat with an agentic AI, patient record browsing, and clinical decision support tools.
 
