@@ -4,7 +4,7 @@
 >
 > **Competition:** [The MedGemma Impact Challenge](https://www.kaggle.com/competitions/med-gemma-impact-challenge) on Kaggle
 
-Vue 3 web interface for DocGemma, a medical AI assistant with integrated EHR management. Provides real-time chat with an agentic AI, patient record browsing, and clinical decision support tools.
+Vue 3 web interface for DocGemma, a medical AI assistant with integrated EHR management. Provides real-time chat with an agentic AI, patient record browsing, and clinical decision support tools. The agent is compatible with [MedGemma 27B](https://huggingface.co/google/medgemma-27b-it) and [MedGemma 1.5 4B](https://huggingface.co/google/medgemma-1.5-4b-it).
 
 ## Overview
 
