@@ -1,10 +1,12 @@
 # DocGemma Frontend
 
+> **Part of the DocGemma project:** [docgemma-app](https://github.com/galinilin/docgemma-app) (Docker deployment) | [docgemma-connect](https://github.com/galinilin/docgemma-connect) (FastAPI backend)
+
 Vue 3 web interface for DocGemma, a medical AI assistant with integrated EHR management. Provides real-time chat with an agentic AI, patient record browsing, and clinical decision support tools.
 
 ## Overview
 
-DocGemma Frontend is a single-page application that connects to the [DocGemma Connect](../docgemma-connect) backend via REST and WebSocket APIs. It enables healthcare professionals to interact with a MedGemma-powered AI agent while managing patient records, reviewing clinical traces, and approving AI-suggested actions through a human-in-the-loop safety workflow.
+DocGemma Frontend is a single-page application that connects to the [DocGemma Connect](https://github.com/galinilin/docgemma-connect) backend via REST and WebSocket APIs. It enables healthcare professionals to interact with a MedGemma-powered AI agent while managing patient records, reviewing clinical traces, and approving AI-suggested actions through a human-in-the-loop safety workflow.
 
 ### Key Features
 
@@ -92,13 +94,13 @@ src/
 ### Prerequisites
 
 - Node.js (v18+)
-- [DocGemma Connect](../docgemma-connect) backend running
+- [DocGemma Connect](https://github.com/galinilin/docgemma-connect) backend running
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/galinilin/docgemma-frontend.git
 cd docgemma-frontend
 
 # Install dependencies
@@ -180,3 +182,10 @@ When the AI agent proposes a write operation (prescribe medication, add allergy,
 2. Frontend displays `ToolApprovalModal` with the tool name and arguments
 3. User can approve (optionally editing arguments), or reject with a reason
 4. Decision is sent back over WebSocket; the agent continues or adjusts accordingly
+
+## Related Repositories
+
+| Repository | Description |
+|---|---|
+| [docgemma-app](https://github.com/galinilin/docgemma-app) | One-command Docker deployment — clone, configure, `docker compose up` |
+| [docgemma-connect](https://github.com/galinilin/docgemma-connect) | FastAPI backend with LangGraph agent, FHIR R4 EHR, and medical tool integrations |
